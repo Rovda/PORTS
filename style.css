@@ -4,11 +4,11 @@
 :root {
   --bg: #000;
   --text: #0f0;
-  --card-bg: rgba(0,0,0,0.85);
+  --card-bg: rgba(0, 0, 0, 0.85);
   --border: #0f0;
 }
 
-/* 2) Reset y fondo “terminal” */
+/* 2) Reset y base */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -21,14 +21,14 @@ html, body {
   font-family: 'Courier New', Courier, monospace;
   overflow-x: hidden;
 }
-/* Patrón de scanlines ligero */
+/* Patrón de scanlines */
 body {
   background-image:
-    radial-gradient(rgba(0,255,0,0.02) 1px, transparent 1px);
+    radial-gradient(rgba(0, 255, 0, 0.02) 1px, transparent 1px);
   background-size: 10px 10px;
 }
 
-/* 3) Contenedor centrado full-screen */
+/* 3) Contenedor centrado */
 .wrapper {
   display: flex;
   flex-direction: column;
@@ -74,9 +74,10 @@ h1 {
   50%      { opacity: 0; }
 }
 
-/* 7) Inputs & selects retro */
-input, select {
-  background: #000;
+/* 7) Inputs y selects retro */
+input,
+select {
+  background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
   padding: 8px;
@@ -86,7 +87,16 @@ input, select {
   border-radius: 2px;
 }
 
-/* 8) Botones estilo terminal */
+/* 8) Enlaces dentro de explicaciones */
+a {
+  color: var(--text);
+  text-decoration: underline;
+}
+a:hover {
+  text-decoration: none;
+}
+
+/* 9) Botones estilo terminal */
 button {
   background: transparent;
   color: var(--text);
@@ -97,37 +107,45 @@ button {
   font-size: 1rem;
   cursor: pointer;
   text-shadow: 0 0 4px var(--text);
-  transition: background .2s, box-shadow .2s;
+  transition: background 0.2s, box-shadow 0.2s;
 }
-button:hover, button:focus {
-  background: rgba(0,255,0,0.1);
+button:hover,
+button:focus {
+  background: rgba(0, 255, 0, 0.1);
   box-shadow: 0 0 8px var(--text);
 }
 
-/* 9) Score, history, timer y explicación */
-.score, .history {
+/* 10) Puntuación, historial, timer y explicación */
+.score,
+.history,
+.timer,
+.result,
+.explanation {
+  width: 90%;
+  max-width: 800px;
+  margin: 1rem 0;
+  text-align: left;
+}
+.score,
+.history {
   background: var(--card-bg);
   border: 1px solid var(--border);
   box-shadow: 0 0 8px var(--text);
-  width: 90%;
-  max-width: 800px;
   padding: 10px;
-  margin-bottom: 1rem;
-  text-align: left;
-  font-size: .95rem;
-}
-.timer, .result, .explanation {
-  margin-top: 1rem;
-  width: 90%;
-  max-width: 800px;
-  text-align: left;
+  font-size: 0.95rem;
 }
 
-/* 10) Responsive */
+/* 11) Responsive */
 @media (max-width: 600px) {
-  .card { padding: 15px; }
-  h1 { font-size: 2rem; }
-  button, input, select {
+  .card {
+    padding: 15px;
+  }
+  h1 {
+    font-size: 2rem;
+  }
+  button,
+  input,
+  select {
     width: 100%;
     max-width: 300px;
   }
