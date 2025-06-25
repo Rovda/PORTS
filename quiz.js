@@ -122,7 +122,7 @@ window.onload = function () {
       document.getElementById("nextBtn").disabled = false;
       current.ports.forEach(p => answeredPorts.add(p));
       correct++;
-      alreadyAnswered = true;
+      alreadyAnswered = true; // ✅ solo ahora se bloquea
       stopFlashTimer();
     } else {
       result.textContent = "❌ Incorrecto. Intenta de nuevo.";
@@ -214,6 +214,7 @@ window.onload = function () {
     `;
   }
 
+  // Exponer funciones globales
   window.startQuiz = startQuiz;
   window.checkAnswer = checkAnswer;
   window.nextQuestion = nextQuestion;
