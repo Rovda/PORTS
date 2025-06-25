@@ -27,7 +27,7 @@ const data = [
   { proto: "Telnet", ports: ["23"], note: "Acceso remoto no cifrado (inseguro)" },
   { proto: "SMTP", ports: ["25"], note: "Correo saliente sin cifrar (TCP)" },
   { proto: "DNS", ports: ["53"], note: "Resolución de nombres (TCP y UDP)" },
-  { proto: "DHCP", ports: ["67", "68"], note: "Asignación dinámica de direcciones IP (UDP)" },
+  { proto: "DHCP", ports: ["67","68"], note: "Asignación dinámica de direcciones IP (UDP)" },
   { proto: "TFTP", ports: ["69"], note: "Protocolo simple de transferencia de archivos (UDP)" },
   { proto: "HTTP", ports: ["80"], note: "Navegación web sin cifrar (inseguro)" },
   { proto: "Kerberos", ports: ["88"], note: "Sistema de autenticación de red (UDP)" },
@@ -62,7 +62,7 @@ let answeredPorts = new Set(), history = [];
 let mode = "proto-to-port", flashMode = false, flashTimer = null, timeLeft = 20;
 let lastRawInput = null;
 
-// —– Declaración de funciones —–
+// —– Funciones —–
 function startQuiz(){
   mode = document.getElementById("mode").value;
   startCard.style.display   = "none";
@@ -80,7 +80,6 @@ function nextQuestion(){
   resultEl.textContent = "";
   expEl.textContent    = "";
   nextBtn.disabled     = true;
-  timerEl.textContent  = "";
 
   const remaining = data.filter(d => d.ports.some(p => !answeredPorts.has(p)));
   if (!remaining.length) return endQuiz();
@@ -100,7 +99,7 @@ function nextQuestion(){
 
 function checkAnswer(e){
   e.preventDefault();
-  stopFlashTimer();
+  // NO llamamos stopFlashTimer() aquí para mantener visible el contador
 
   const raw = answerIn.value.trim();
   if (!raw) {
@@ -164,7 +163,7 @@ function startFlashTimer(){
 
 function stopFlashTimer(){
   clearInterval(flashTimer);
-  timerEl.textContent = "";
+  // no borramos timerEl aquí para que siga visible
 }
 
 function toggleTheme(){
@@ -229,7 +228,10 @@ function endQuiz(){
 // —– Event Listeners —–
 startBtn.addEventListener("click", startQuiz);
 themeBtn.addEventListener("click", toggleTheme);
-flashBtn.addEventListener("click", toggleFlashMode);
+flashBtn.addEventListener("click", () => {
+  toggleFlashMode();
+  if (flashMode) startFlashTimer();
+});
 checkBtn.addEventListener("click", checkAnswer);
 nextBtn.addEventListener("click", nextQuestion);
 endBtn.addEventListener("click", endQuiz);
