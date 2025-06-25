@@ -92,6 +92,8 @@ function startQuiz(){
   startCard.style.display   = "none";
   summaryCard.style.display = "none";
   quizCard.style.display    = "block";
+  // ocultar score e historial mientras dura el quiz
+  scoreEl.style.display   = "none"; historyEl.style.display = "none";
   correct = 0; wrong = 0;
   answeredPorts.clear(); history = [];
   updateScore();
@@ -221,8 +223,10 @@ function logHistory(input,ok){
 
 function endQuiz(){
   stopFlashTimer();
-  quizCard.style.display="none";
-  summaryCard.style.display="block";
+  quizCard.style.display    = "none";
+  summaryCard.style.display = "block";
+  // volver a mostrar score e historial al terminar
+  scoreEl.style.display   = ""; historyEl.style.display = "";
   const total=correct+wrong, pct=total?Math.round((correct/total)*100):0;
   summaryStats.innerHTML=`
     <p>✅ Aciertos: <strong>${correct}</strong></p>
