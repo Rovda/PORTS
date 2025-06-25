@@ -1,4 +1,5 @@
-window.onload = function () {
+(function() {
+  // Datos iniciales
   const data = [
     { proto: "FTP", ports: ["21", "20"], note: "File Transfer Protocol (FTP)" },
     { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
@@ -29,12 +30,13 @@ window.onload = function () {
     { proto: "Microsoft SQL", ports: ["1433"], note: "Base de datos Microsoft SQL Server" },
     { proto: "Oracle SQL", ports: ["1521"], note: "Base de datos Oracle" },
     { proto: "MySQL", ports: ["3306"], note: "Base de datos MySQL" },
-    { proto: "RADIUS (TCP)", ports: ["1645","1646"], note: "RADIUS heredado (TCP)" },
-    { proto: "RADIUS (UDP)", ports: ["1812","1813"], note: "RADIUS estándar (UDP)" },
+    { proto: "RADIUS (TCP)", ports: ["1645", "1646"], note: "RADIUS heredado (TCP)" },
+    { proto: "RADIUS (UDP)", ports: ["1812", "1813"], note: "RADIUS estándar (UDP)" },
     { proto: "Syslog TLS", ports: ["6514"], note: "Syslog seguro con TLS (TCP)" },
     { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
   ];
 
+  // Estado interno
   let current = {};
   let correct = 0;
   let wrong = 0;
@@ -46,44 +48,60 @@ window.onload = function () {
   let timeLeft = 20;
   let lastRawInput = null;
 
-  // Element references
-  const startCard   = document.getElementById("startCard");
-  const quizCard    = document.getElementById("quizCard");
-  const summaryCard = document.getElementById("summaryCard");
-  const questionEl  = document.getElementById("question");
-  const answerIn    = document.getElementById("answerInput");
-  const checkBtn    = document.getElementById("checkBtn");
-  const nextBtn     = document.getElementById("nextBtn");
-  const timerEl     = document.getElementById("timer");
-  const resultEl    = document.getElementById("result");
-  const expEl       = document.getElementById("explanation");
-  const scoreEl     = document.getElementById("score");
-  const historyEl   = document.getElementById("history");
-  const summaryStats     = document.getElementById("summaryStats");
-  const summaryFailures  = document.getElementById("summaryFailures");
+  // Referencias a elementos
+  const startBtn   = document.getElementById("startBtn");
+  const themeBtn   = document.getElementById("themeBtn");
+  const flashBtn   = document.getElementById("flashBtn");
+  const checkBtn   = document.getElementById("checkBtn");
+  const nextBtn    = document.getElementById("nextBtn");
+  const endBtn     = document.getElementById("endBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const questionEl = document.getElementById("question");
+  const answerIn   = document.getElementById("answerInput");
+  const timerEl    = document.getElementById("timer");
+  const resultEl   = document.getElementById("result");
+  const expEl      = document.getElementById("explanation");
+  const scoreEl    = document.getElementById("score");
+  const historyEl  = document.getElementById("history");
+  const summaryStats    = document.getElementById("summaryStats");
+  const summaryFailures = document.getElementById("summaryFailures");
 
-  // Bind listeners
-  checkBtn.addEventListener("click", checkAnswer);
-  nextBtn.addEventListener("click", nextQuestion);
-  answerIn.addEventListener("input", () => {
-    lastRawInput = null;
-    resultEl.textContent = "";
+  // Funciones expuestas globalmente
+  window.startQuiz       = startQuiz;
+  window.toggleTheme     = toggleTheme;
+  window.toggleFlashMode = toggleFlashMode;
+  window.endQuiz         = endQuiz;
+
+  // Bind eventos una vez cargado el DOM
+  document.addEventListener("DOMContentLoaded", () => {
+    startBtn.addEventListener("click", startQuiz);
+    themeBtn.addEventListener("click", toggleTheme);
+    flashBtn.addEventListener("click", toggleFlashMode);
+    checkBtn.addEventListener("click", checkAnswer);
+    nextBtn.addEventListener("click", nextQuestion);
+    endBtn.addEventListener("click", endQuiz);
+    restartBtn.addEventListener("click", () => location.reload());
+    answerIn.addEventListener("input", () => {
+      lastRawInput = null;
+      resultEl.textContent = "";
+    });
+    updateScore();
   });
 
-  window.startQuiz = function () {
+  function startQuiz() {
     mode = document.getElementById("mode").value;
-    startCard.style.display   = "none";
-    summaryCard.style.display = "none";
-    quizCard.style.display    = "block";
+    document.getElementById("startCard").style.display   = "none";
+    document.getElementById("summaryCard").style.display = "none";
+    document.getElementById("quizCard").style.display    = "block";
     correct = 0;
     wrong   = 0;
     answeredPorts.clear();
     history = [];
     updateScore();
     nextQuestion();
-  };
+  }
 
-  window.nextQuestion = function () {
+  function nextQuestion() {
     stopFlashTimer();
     lastRawInput = null;
     resultEl.textContent      = "";
@@ -107,7 +125,7 @@ window.onload = function () {
 
     answerIn.value = "";
     if (flashMode) startFlashTimer();
-  };
+  }
 
   function checkAnswer(event) {
     event.preventDefault();
@@ -116,12 +134,12 @@ window.onload = function () {
     const raw = answerIn.value.trim();
     if (!raw) {
       resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
-      resultEl.className = "result incorrect";
+      resultEl.className   = "result incorrect";
       return;
     }
     if (raw === lastRawInput) {
       resultEl.textContent = "✏️ Cambia tu respuesta para volver a comprobar.";
-      resultEl.className = "result incorrect";
+      resultEl.className   = "result incorrect";
       return;
     }
     lastRawInput = raw;
@@ -148,12 +166,12 @@ window.onload = function () {
 
     if (isCorrect) {
       resultEl.textContent = "✅ ¡Correcto!";
-      resultEl.className = "result correct";
+      resultEl.className   = "result correct";
       current.ports.forEach(p => answeredPorts.add(p));
       correct++;
     } else {
       resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
-      resultEl.className = "result incorrect";
+      resultEl.className   = "result incorrect";
       wrong++;
     }
 
@@ -161,37 +179,6 @@ window.onload = function () {
     updateScore();
     logHistory(raw, isCorrect);
   }
-
-  window.toggleTheme = function () {
-    const root = document.documentElement;
-    const bg = getComputedStyle(root).getPropertyValue('--bg').trim();
-    if (bg === '#000') {
-      root.style.setProperty('--bg',   '#fff');
-      root.style.setProperty('--text', '#000');
-      root.style.setProperty('--card-bg', 'rgba(255,255,255,0.85)');
-      root.style.setProperty('--border', '#000');
-    } else {
-      root.style.setProperty('--bg',   '#000');
-      root.style.setProperty('--text', '#0f0');
-      root.style.setProperty('--card-bg', 'rgba(0,0,0,0.85)');
-      root.style.setProperty('--border', '#0f0');
-    }
-  };
-
-  window.toggleFlashMode = function () {
-    flashMode = !flashMode;
-    if (flashMode) {
-      // if a question is visible, start timer immediately
-      if (quizCard.style.display === 'block') startFlashTimer();
-    } else {
-      stopFlashTimer();
-    }
-    alert(
-      flashMode
-        ? '⚡ Modo Flash activado (20s por pregunta)'
-        : '⚡ Modo Flash desactivado'
-    );
-  };
 
   function startFlashTimer() {
     stopFlashTimer();
@@ -215,7 +202,7 @@ window.onload = function () {
 
   function updateScore() {
     const total = correct + wrong;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct / total) * 100) : 0;
     scoreEl.innerHTML = `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
   }
 
@@ -226,25 +213,21 @@ window.onload = function () {
     historyEl.innerHTML = `<strong>🧾 Últimas respuestas:</strong><ul>${list}</ul>`;
   }
 
-  window.endQuiz = function () {
+  function endQuiz() {
     stopFlashTimer();
     quizCard.style.display    = "none";
     summaryCard.style.display = "block";
-
     const total = correct + wrong;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct / total) * 100) : 0;
     summaryStats.innerHTML = `
       <p>✅ Aciertos: <strong>${correct}</strong></p>
       <p>❌ Errores: <strong>${wrong}</strong></p>
       <p>📊 Precisión: <strong>${pct}%</strong></p>
     `;
-    const fails = history
-      .filter(h => h.includes("❌"))
-      .map(h => `<li>${h}</li>`)
-      .join("");
+    const fails = history.filter(h => h.includes("❌")).map(h => `<li>${h}</li>`).join("");
     summaryFailures.innerHTML = `
       <h3>❌ Preguntas fallidas:</h3>
       <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
     `;
-  };
-};
+  }
+})();
