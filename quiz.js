@@ -37,7 +37,7 @@ window.onload = function () {
   let current = {};
   let correct = 0;
   let wrong = 0;
-  let answered = new Set();
+  let answeredPorts = new Set();
   let mode = "proto-to-port";
   let history = [];
   let flashMode = false;
@@ -54,7 +54,9 @@ window.onload = function () {
 
   function nextQuestion() {
     alreadyAnswered = false;
-    const remaining = data.filter(item => !answered.has(item.proto));
+    const remaining = data.filter(item =>
+      item.ports.some(port => !answeredPorts.has(port))
+    );
     if (remaining.length === 0) return endQuiz();
 
     const index = Math.floor(Math.random() * remaining.length);
@@ -63,7 +65,8 @@ window.onload = function () {
     if (mode === "proto-to-port") {
       document.getElementById("question").textContent = `¿Qué puerto usa ${current.proto}?`;
     } else {
-      const port = current.ports[Math.floor(Math.random() * current.ports.length)];
+      const unaskedPorts = current.ports.filter(p => !answeredPorts.has(p));
+      const port = unaskedPorts[Math.floor(Math.random() * unaskedPorts.length)];
       current.port = port;
       document.getElementById("question").textContent = `¿Qué protocolo usa el puerto ${port}?`;
     }
@@ -79,9 +82,16 @@ window.onload = function () {
 
   function checkAnswer() {
     if (alreadyAnswered) return;
-    alreadyAnswered = true;
 
-    const input = document.getElementById("answerInput").value.trim().toLowerCase();
+    const rawInput = document.getElementById("answerInput").value.trim();
+    if (!rawInput) {
+      document.getElementById("result").textContent = "⚠️ Por favor escribe una respuesta.";
+      document.getElementById("result").className = "result incorrect";
+      return;
+    }
+
+    alreadyAnswered = true;
+    const input = rawInput.toLowerCase();
     const result = document.getElementById("result");
     const explanation = document.getElementById("explanation");
 
@@ -109,7 +119,7 @@ window.onload = function () {
       result.textContent = "✅ ¡Correcto!";
       result.className = "result correct";
       document.getElementById("nextBtn").disabled = false;
-      answered.add(current.proto);
+      current.ports.forEach(p => answeredPorts.add(p));
       correct++;
       stopFlashTimer();
     } else {
@@ -202,7 +212,6 @@ window.onload = function () {
     `;
   }
 
-  // Exponer funciones globales
   window.startQuiz = startQuiz;
   window.checkAnswer = checkAnswer;
   window.nextQuestion = nextQuestion;
