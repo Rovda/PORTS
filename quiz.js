@@ -44,10 +44,17 @@ window.onload = function () {
   let flashTimer = null;
   let timeLeft = 20;
   let alreadyAnswered = false;
+  let lastRawInput = null;
 
-  // Vincular eventos a botones
+  // Vincular eventos
   document.getElementById("checkBtn").addEventListener("click", checkAnswer);
   document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+
+  // Resetear lastRawInput cuando el usuario edita la respuesta
+  document.getElementById("answerInput").addEventListener("input", () => {
+    lastRawInput = null;
+    document.getElementById("result").textContent = "";
+  });
 
   function startQuiz() {
     mode = document.getElementById("mode").value;
@@ -58,6 +65,7 @@ window.onload = function () {
 
   function nextQuestion() {
     alreadyAnswered = false;
+    lastRawInput = null;
     const remaining = data.filter(item =>
       item.ports.some(port => !answeredPorts.has(port))
     );
@@ -80,7 +88,6 @@ window.onload = function () {
     document.getElementById("explanation").textContent = "";
     document.getElementById("nextBtn").disabled = true;
     document.getElementById("timer").textContent = "";
-
     if (flashMode) startFlashTimer();
   }
 
@@ -88,14 +95,19 @@ window.onload = function () {
     event.preventDefault();
     const raw = document.getElementById("answerInput").value.trim();
     const resultEl = document.getElementById("result");
-    const expEl = document.getElementById("explanation");
+    const expEl    = document.getElementById("explanation");
 
     if (!raw) {
       resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
       resultEl.className = "result incorrect";
       return;
     }
-    if (alreadyAnswered) return;
+    if (lastRawInput === raw) {
+      resultEl.textContent = "✏️ Cambia tu respuesta para volver a comprobar.";
+      resultEl.className = "result incorrect";
+      return;
+    }
+    lastRawInput = raw;
 
     const input = raw.toLowerCase().replace(/[^a-z0-9]/gi, "");
     let isCorrect = false;
@@ -129,6 +141,7 @@ window.onload = function () {
       resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
       resultEl.className = "result incorrect";
       wrong++;
+      document.getElementById("nextBtn").disabled = false;
     }
 
     updateScore();
@@ -137,7 +150,7 @@ window.onload = function () {
 
   function updateScore() {
     const total = correct + wrong;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct / total) * 100) : 0;
     document.getElementById("score").innerHTML =
       `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
   }
@@ -152,16 +165,13 @@ window.onload = function () {
 
   function toggleTheme() {
     const root = document.documentElement;
-    const currentBg = getComputedStyle(root).getPropertyValue('--bg').trim();
-
-    if (currentBg === '#000') {
-      // Tema claro
+    const bg   = getComputedStyle(root).getPropertyValue('--bg').trim();
+    if (bg === '#000') {
       root.style.setProperty('--bg', '#fff');
       root.style.setProperty('--text', '#000');
       root.style.setProperty('--card-bg', 'rgba(255,255,255,0.85)');
       root.style.setProperty('--border', '#000');
     } else {
-      // Tema “hacker”
       root.style.setProperty('--bg', '#000');
       root.style.setProperty('--text', '#0f0');
       root.style.setProperty('--card-bg', 'rgba(0,0,0,0.85)');
@@ -202,11 +212,10 @@ window.onload = function () {
 
   function endQuiz() {
     stopFlashTimer();
-    document.getElementById("quizCard").style.display = "none";
+    document.getElementById("quizCard").style.display    = "none";
     document.getElementById("summaryCard").style.display = "block";
-
     const total = correct + wrong;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct / total) * 100) : 0;
     document.getElementById("summaryStats").innerHTML = `
       <p>✅ Aciertos: <strong>${correct}</strong></p>
       <p>❌ Errores: <strong>${wrong}</strong></p>
@@ -221,9 +230,9 @@ window.onload = function () {
   }
 
   // Exponer funciones globales
-  window.startQuiz = startQuiz;
-  window.nextQuestion = nextQuestion;
-  window.toggleTheme = toggleTheme;
+  window.startQuiz       = startQuiz;
+  window.nextQuestion    = nextQuestion;
+  window.toggleTheme     = toggleTheme;
   window.toggleFlashMode = toggleFlashMode;
-  window.endQuiz = endQuiz;
+  window.endQuiz         = endQuiz;
 };
