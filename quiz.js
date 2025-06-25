@@ -20,7 +20,6 @@ window.onload = function () {
     { proto: "LDAP", ports: ["389"], note: "Acceso a directorios sin cifrado (TCP)" },
     { proto: "HTTPS", ports: ["443"], note: "Navegación web cifrada con SSL/TLS" },
     { proto: "SMB", ports: ["445"], note: "Compartición de archivos (TCP)" },
-    { proto: "SMTPS", ports: ["465", "587"], note: "SMTP con cifrado: 465 (SSL), 587 (STARTTLS)" },
     { proto: "SMTP (SSL)", ports: ["465"], note: "SMTP sobre SSL (obsoleto pero aún usado)" },
     { proto: "SMTP (STARTTLS)", ports: ["587"], note: "SMTP con cifrado STARTTLS (recomendado)" },
     { proto: "Syslog", ports: ["514"], note: "Registro de eventos del sistema (UDP)" },
@@ -47,30 +46,45 @@ window.onload = function () {
   let timeLeft = 20;
   let lastRawInput = null;
 
-  // Bind event listeners
-  document.getElementById("checkBtn").addEventListener("click", checkAnswer);
-  document.getElementById("nextBtn").addEventListener("click", nextQuestion);
-  document.getElementById("answerInput").addEventListener("input", () => {
+  // Botones e input
+  const checkBtn = document.getElementById("checkBtn");
+  const nextBtn  = document.getElementById("nextBtn");
+  const answerIn = document.getElementById("answerInput");
+
+  checkBtn.addEventListener("click", checkAnswer);
+  nextBtn.addEventListener("click", nextQuestion);
+  answerIn.addEventListener("input", () => {
     lastRawInput = null;
     document.getElementById("result").textContent = "";
   });
 
   window.startQuiz = function () {
     mode = document.getElementById("mode").value;
-    document.getElementById("startCard").style.display = "none";
-    document.getElementById("quizCard").style.display = "block";
+    document.getElementById("startCard").style.display   = "none";
+    document.getElementById("summaryCard").style.display = "none";
+    document.getElementById("quizCard").style.display    = "block";
+    correct = 0;
+    wrong   = 0;
+    answeredPorts.clear();
+    history = [];
+    updateScore();
     nextQuestion();
   };
 
   window.nextQuestion = function () {
     stopFlashTimer();
     lastRawInput = null;
+    document.getElementById("result").textContent      = "";
+    document.getElementById("explanation").textContent = "";
+    nextBtn.disabled = true;
+
     const remaining = data.filter(item =>
       item.ports.some(port => !answeredPorts.has(port))
     );
     if (!remaining.length) return endQuiz();
 
     current = remaining[Math.floor(Math.random() * remaining.length)];
+
     if (mode === "proto-to-port") {
       document.getElementById("question").textContent =
         `¿Qué puerto usa ${current.proto}?`;
@@ -81,19 +95,18 @@ window.onload = function () {
         `¿Qué protocolo usa el puerto ${current.port}?`;
     }
 
-    document.getElementById("answerInput").value = "";
-    document.getElementById("result").textContent = "";
-    document.getElementById("explanation").textContent = "";
-    document.getElementById("nextBtn").disabled = true;
+    answerIn.value = "";
     document.getElementById("timer").textContent = "";
     if (flashMode) startFlashTimer();
   };
 
   function checkAnswer(event) {
     event.preventDefault();
-    const raw = document.getElementById("answerInput").value.trim();
+    stopFlashTimer();
+
+    const raw = answerIn.value.trim();
     const resultEl = document.getElementById("result");
-    const expEl = document.getElementById("explanation");
+    const expEl    = document.getElementById("explanation");
 
     if (!raw) {
       resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
@@ -127,7 +140,6 @@ window.onload = function () {
       </a>
     `;
 
-    stopFlashTimer();
     if (isCorrect) {
       resultEl.textContent = "✅ ¡Correcto!";
       resultEl.className = "result correct";
@@ -138,7 +150,8 @@ window.onload = function () {
       resultEl.className = "result incorrect";
       wrong++;
     }
-    document.getElementById("nextBtn").disabled = false;
+
+    nextBtn.disabled = false;
     updateScore();
     logHistory(raw, isCorrect);
   }
@@ -161,10 +174,9 @@ window.onload = function () {
 
   window.toggleFlashMode = function () {
     flashMode = !flashMode;
-    alert(
-      flashMode
-        ? '⚡ Modo Flash activado (20s por pregunta)'
-        : '⚡ Modo Flash desactivado'
+    alert(flashMode
+      ? '⚡ Modo Flash activado (20s por pregunta)'
+      : '⚡ Modo Flash desactivado'
     );
   };
 
@@ -175,7 +187,8 @@ window.onload = function () {
       timeLeft--;
       document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
       if (timeLeft <= 0) {
-        stopFlashTimer();
+        clearInterval(flashTimer);
+        alert('⏱️ ¡Tiempo agotado! El test ha finalizado.');
         endQuiz();
       }
     }, 1000);
@@ -188,7 +201,7 @@ window.onload = function () {
 
   function updateScore() {
     const total = correct + wrong;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct / total) * 100) : 0;
     document.getElementById("score").innerHTML =
       `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
   }
@@ -203,19 +216,18 @@ window.onload = function () {
 
   window.endQuiz = function () {
     stopFlashTimer();
-    document.getElementById("quizCard").style.display = "none";
+    document.getElementById("quizCard").style.display    = "none";
     document.getElementById("summaryCard").style.display = "block";
+
     const total = correct + wrong;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct / total) * 100) : 0;
     document.getElementById("summaryStats").innerHTML = `
       <p>✅ Aciertos: <strong>${correct}</strong></p>
       <p>❌ Errores: <strong>${wrong}</strong></p>
       <p>📊 Precisión: <strong>${pct}%</strong></p>
     `;
-    const fails = history
-      .filter(h => h.includes("❌"))
-      .map(h => `<li>${h}</li>`)
-      .join("");
+    const fails = history.filter(h => h.includes("❌"))
+                         .map(h => `<li>${h}</li>`).join("");
     document.getElementById("summaryFailures").innerHTML = `
       <h3>❌ Preguntas fallidas:</h3>
       <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
