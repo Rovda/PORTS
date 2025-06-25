@@ -85,12 +85,14 @@ window.onload = function () {
 
     const rawInput = document.getElementById("answerInput").value.trim();
     if (!rawInput) {
-      document.getElementById("result").textContent = "⚠️ Por favor escribe una respuesta.";
-      document.getElementById("result").className = "result incorrect";
-      return;
-    }
+  document.getElementById("result").textContent = "⚠️ Por favor escribe una respuesta.";
+  document.getElementById("result").className = "result incorrect";
+  return; // ❌ NO marcamos como respondida todavía
+}
 
-    alreadyAnswered = true;
+// ✅ Solo marcamos como respondida si hay entrada válida
+alreadyAnswered = true;
+
     const input = rawInput.toLowerCase();
     const result = document.getElementById("result");
     const explanation = document.getElementById("explanation");
