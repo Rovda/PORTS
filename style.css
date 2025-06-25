@@ -1,3 +1,17 @@
+/* style.css */
+/* —– Ocultar score e history por defecto —– */
+#score,
+#history {
+  display: none;
+}
+
+/* —– Mostrar solo cuando termine el quiz —– */
+body.quiz-over #score,
+body.quiz-over #history {
+  display: block;
+}
+
+/* resto de tu CSS existente */
 :root {
   --bg: #000;
   --text: #0f0;
@@ -90,7 +104,6 @@ button:hover,button:focus {
   font-size:.95rem;
 }
 @media(max-width:600px) {
-  /* Ajustes para vista móvil: permitir desplazamiento natural y anclar contenido al inicio */
   .wrapper {
     height: auto;
     justify-content: flex-start;
