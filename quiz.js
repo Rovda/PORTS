@@ -81,7 +81,7 @@ window.onload = function () {
   }
 
   function checkAnswer() {
-    if (alreadyAnswered) return;
+    if (alreadyAnswered && document.getElementById("nextBtn").disabled === false) return;
 
     const rawInput = document.getElementById("answerInput").value.trim();
     if (!rawInput) {
