@@ -1,5 +1,3 @@
-// quiz.js
-
 // —– Referencias DOM —–
 const startBtn       = document.getElementById("startBtn");
 const themeBtn       = document.getElementById("themeBtn");
@@ -59,14 +57,12 @@ const data = [
 ];
 
 // —– Estado —–
-let current = {};
-let correct = 0, wrong = 0;
+let current = {}, correct = 0, wrong = 0;
 let answeredPorts = new Set(), history = [];
-let mode = "proto-to-port";
-let flashMode = false, flashTimer = null, timeLeft = 20;
+let mode = "proto-to-port", flashMode = false, flashTimer = null, timeLeft = 20;
 let lastRawInput = null;
 
-// —– Inicia el quiz —–
+// —– Funciones —–
 function startQuiz(){
   mode = document.getElementById("mode").value;
   startCard.style.display   = "none";
@@ -78,9 +74,8 @@ function startQuiz(){
   nextQuestion();
 }
 
-// —– Prepara la siguiente pregunta —–
 function nextQuestion(){
-  // Detén cualquier timer anterior (pero no escondas el texto)
+  // Detenemos cualquier intervalo anterior
   clearInterval(flashTimer);
 
   lastRawInput = null;
@@ -89,12 +84,10 @@ function nextQuestion(){
   nextBtn.disabled     = true;
   answerIn.value       = "";
 
-  // Selecciona pregunta no respondida
   const remaining = data.filter(d => d.ports.some(p => !answeredPorts.has(p)));
   if (!remaining.length) return endQuiz();
   current = remaining[Math.floor(Math.random() * remaining.length)];
 
-  // Muestra la pregunta
   if (mode === "proto-to-port") {
     questionEl.textContent = `¿Qué puerto usa ${current.proto}?`;
   } else {
@@ -103,15 +96,18 @@ function nextQuestion(){
     questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
   }
 
-  // Inicia timer si está activo el Modo Flash
-  if (flashMode) startFlashTimer();
-  else timerEl.textContent = "";
+  if (flashMode) {
+    timeLeft = 20;
+    timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
+    startFlashTimer();
+  } else {
+    timerEl.textContent = "";
+  }
 }
 
-// —– Comprueba la respuesta —–
 function checkAnswer(e){
   e.preventDefault();
-  // NO clearInterval aquí: mantenemos el timer visible
+  // NO clearInterval aquí: mantenemos contador visible hasta saber si es correcto
 
   const raw = answerIn.value.trim();
   if (!raw) {
@@ -132,6 +128,11 @@ function checkAnswer(e){
     : current.proto.split("/").some(p =>
         p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim() === input
       );
+
+  // Si es correcto, detenemos el timer
+  if (isCorrect && flashMode) {
+    clearInterval(flashTimer);
+  }
 
   // Explicación
   const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
@@ -160,11 +161,7 @@ function checkAnswer(e){
   logHistory(raw, isCorrect);
 }
 
-// —– Inicia el timer de Flash —–
 function startFlashTimer(){
-  clearInterval(flashTimer);
-  timeLeft = 20;
-  timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
   flashTimer = setInterval(() => {
     timeLeft--;
     timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
@@ -176,7 +173,6 @@ function startFlashTimer(){
   }, 1000);
 }
 
-// —– Alterna tema claro/oscuro —–
 function toggleTheme(){
   const root = document.documentElement;
   const bg   = getComputedStyle(root).getPropertyValue("--bg").trim();
@@ -193,10 +189,11 @@ function toggleTheme(){
   }
 }
 
-// —– Activa/Desactiva Modo Flash —–
 function toggleFlashMode(){
   flashMode = !flashMode;
   if (flashMode) {
+    timeLeft = 20;
+    timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
     startFlashTimer();
     alert("⚡ Modo Flash activado (20s por pregunta)");
   } else {
@@ -206,7 +203,6 @@ function toggleFlashMode(){
   }
 }
 
-// —– Resto de utilidades —–
 function updateScore(){
   const total = correct + wrong;
   const pct   = total ? Math.round((correct/total)*100) : 0;
@@ -240,15 +236,15 @@ function endQuiz(){
   `;
 }
 
-// —– Event Listeners —–
+// —– Listeners —–
 startBtn.addEventListener("click", startQuiz);
 themeBtn.addEventListener("click", toggleTheme);
 flashBtn.addEventListener("click", toggleFlashMode);
 checkBtn.addEventListener("click", checkAnswer);
 nextBtn.addEventListener("click", nextQuestion);
 endBtn.addEventListener("click", endQuiz);
-restartBtn.addEventListener("click", ()=>location.reload());
-answerIn.addEventListener("input", ()=>{
+restartBtn.addEventListener("click", () => location.reload());
+answerIn.addEventListener("input", () => {
   lastRawInput = null;
   resultEl.textContent = "";
 });
