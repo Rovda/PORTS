@@ -20,73 +20,70 @@ const summaryCard     = document.getElementById("summaryCard");
 const summaryStats    = document.getElementById("summaryStats");
 const summaryFailures = document.getElementById("summaryFailures");
 
-// —– Datos —–
+// —– Datos completos —–
 const data = [
-    { proto: "FTP", ports: ["21", "20"], note: "File Transfer Protocol (FTP)" },
-    { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
-    { proto: "SFTP", ports: ["22"], note: "FTP sobre SSH (cifrado)" },
-    { proto: "Telnet", ports: ["23"], note: "Acceso remoto no cifrado (inseguro)" },
-    { proto: "SMTP", ports: ["25"], note: "Correo saliente sin cifrar (TCP)" },
-    { proto: "DNS", ports: ["53"], note: "Resolución de nombres (TCP y UDP)" },
-    { proto: "DHCP", ports: ["67", "68"], note: "Asignación dinámica de direcciones IP (UDP)" },
-    { proto: "TFTP", ports: ["69"], note: "Protocolo simple de transferencia de archivos (UDP)" },
-    { proto: "HTTP", ports: ["80"], note: "Navegación web sin cifrar (inseguro)" },
-    { proto: "Kerberos", ports: ["88"], note: "Sistema de autenticación de red (UDP)" },
-    { proto: "POP3", ports: ["110"], note: "Correo entrante sin cifrar (TCP)" },
-    { proto: "NNTP", ports: ["119"], note: "Protocolo de noticias (TCP)" },
-    { proto: "RPC", ports: ["135"], note: "Remote Procedure Call (TCP y UDP)" },
-    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "137=Name, 138=Datagram, 139=Session" },
-    { proto: "IMAP", ports: ["143"], note: "Acceso remoto a correo sin cifrar (TCP)" },
-    { proto: "SNMP", ports: ["161"], note: "Gestión de red (UDP)" },
-    { proto: "SNMP Trap", ports: ["162"], note: "Trampas de SNMP (UDP)" },
-    { proto: "LDAP", ports: ["389"], note: "Acceso a directorios sin cifrado (TCP)" },
-    { proto: "HTTPS", ports: ["443"], note: "Navegación web cifrada con SSL/TLS" },
-    { proto: "SMB", ports: ["445"], note: "Compartición de archivos (TCP)" },
-    { proto: "SMTP (SSL)", ports: ["465"], note: "SMTP sobre SSL (obsoleto pero aún usado)" },
-    { proto: "SMTP (STARTTLS)", ports: ["587"], note: "SMTP con cifrado STARTTLS (recomendado)" },
-    { proto: "Syslog", ports: ["514"], note: "Registro de eventos del sistema (UDP)" },
-    { proto: "LDAPS", ports: ["636"], note: "LDAP sobre TLS (seguro)" },
-    { proto: "IMAPS", ports: ["993"], note: "IMAP sobre SSL/TLS (seguro)" },
-    { proto: "POP3S", ports: ["995"], note: "POP3 sobre SSL/TLS (seguro)" },
-    { proto: "Microsoft SQL", ports: ["1433"], note: "Base de datos Microsoft SQL Server" },
-    { proto: "Oracle SQL", ports: ["1521"], note: "Base de datos Oracle" },
-    { proto: "MySQL", ports: ["3306"], note: "Base de datos MySQL" },
-    { proto: "RADIUS (TCP)", ports: ["1645", "1646"], note: "RADIUS heredado (TCP)" },
-    { proto: "RADIUS (UDP)", ports: ["1812", "1813"], note: "RADIUS estándar (UDP)" },
-    { proto: "Syslog TLS", ports: ["6514"], note: "Syslog seguro con TLS (TCP)" },
-    { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
-
+  { proto: "FTP",            ports: ["21","20"],         note: "File Transfer Protocol" },
+  { proto: "SSH",            ports: ["22"],              note: "Secure Shell" },
+  { proto: "SFTP",           ports: ["22"],              note: "FTP sobre SSH" },
+  { proto: "Telnet",         ports: ["23"],              note: "Acceso remoto no cifrado" },
+  { proto: "SMTP",           ports: ["25"],              note: "Correo saliente sin cifrar" },
+  { proto: "DNS",            ports: ["53"],              note: "Resolución de nombres" },
+  { proto: "DHCP",           ports: ["67","68"],          note: "Asignación dinámica IP" },
+  { proto: "TFTP",           ports: ["69"],              note: "Transferencia simple de archivos" },
+  { proto: "HTTP",           ports: ["80"],              note: "Navegación web sin cifrar" },
+  { proto: "Kerberos",       ports: ["88"],              note: "Autenticación de red" },
+  { proto: "POP3",           ports: ["110"],             note: "Correo entrante sin cifrar" },
+  { proto: "NNTP",           ports: ["119"],             note: "Protocolo de noticias" },
+  { proto: "RPC",            ports: ["135"],             note: "Llamadas RPC" },
+  { proto: "NetBIOS",        ports: ["137","138","139"],  note: "NetBIOS Name/Datagram/Session" },
+  { proto: "IMAP",           ports: ["143"],             note: "Acceso remoto a correo" },
+  { proto: "SNMP",           ports: ["161"],             note: "Gestión de red" },
+  { proto: "SNMP Trap",      ports: ["162"],             note: "Trampas SNMP" },
+  { proto: "LDAP",           ports: ["389"],             note: "LDAP sin cifrado" },
+  { proto: "HTTPS",          ports: ["443"],             note: "Web cifrada SSL/TLS" },
+  { proto: "SMB",            ports: ["445"],             note: "Compartición de archivos" },
+  { proto: "SMTP (SSL)",     ports: ["465"],             note: "SMTP sobre SSL" },
+  { proto: "SMTP (STARTTLS)",ports: ["587"],             note: "SMTP STARTTLS" },
+  { proto: "Syslog",         ports: ["514"],             note: "Log sistema UDP" },
+  { proto: "LDAPS",          ports: ["636"],             note: "LDAP sobre TLS" },
+  { proto: "IMAPS",          ports: ["993"],             note: "IMAP sobre SSL/TLS" },
+  { proto: "POP3S",          ports: ["995"],             note: "POP3 sobre SSL/TLS" },
+  { proto: "Microsoft SQL",  ports: ["1433"],            note: "SQL Server" },
+  { proto: "Oracle SQL",     ports: ["1521"],            note: "Oracle DB" },
+  { proto: "MySQL",          ports: ["3306"],            note: "MySQL DB" },
+  { proto: "RADIUS (TCP)",   ports: ["1645","1646"],      note: "RADIUS TCP legado" },
+  { proto: "RADIUS (UDP)",   ports: ["1812","1813"],      note: "RADIUS UDP" },
+  { proto: "Syslog TLS",     ports: ["6514"],            note: "Syslog seguro TLS" },
+  { proto: "RDP",            ports: ["3389"],            note: "Remote Desktop Protocol" }
 ];
 
 // —– Estado —–
-let current = {};
-let correct = 0, wrong = 0;
-let answeredPorts = new Set(), history = [];
-let mode = "proto-to-port";
-let flashMode = false, flashTimer = null, timeLeft = 20;
+let current = {}, correct = 0, wrong = 0;
+let answeredPorts = new Set();
+let history = []; // guardaremos {question, given, correct, isCorrect}
+let mode = "proto-to-port", flashMode = false, flashTimer = null, timeLeft = 20;
 let lastRawInput = null;
 
-// —– Funciones de Modo Flash —–
+// —– Flash timer —–
 function startFlashTimer(){
   if (flashTimer) clearInterval(flashTimer);
-  timeLeft = 20;
-  timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
-  flashTimer = setInterval(() => {
+  timeLeft = 20; timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
+  flashTimer = setInterval(()=>{
     timeLeft--;
     timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
-    if (timeLeft <= 0) {
+    if(timeLeft<=0){
       clearInterval(flashTimer);
       alert('⏱️ ¡Tiempo agotado!');
       endQuiz();
     }
-  }, 1000);
+  },1000);
 }
 function stopFlashTimer(){
   if (flashTimer) clearInterval(flashTimer);
   flashTimer = null;
 }
 
-// —– Inicio y navegación —–
+// —– Inicio Quiz —–
 function startQuiz(){
   mode = document.getElementById("mode").value;
   startCard.style.display   = "none";
@@ -99,6 +96,7 @@ function startQuiz(){
   nextQuestion();
 }
 
+// —– Siguiente pregunta —–
 function nextQuestion(){
   stopFlashTimer();
   lastRawInput = null;
@@ -107,32 +105,32 @@ function nextQuestion(){
   nextBtn.disabled     = true;
   answerIn.value       = "";
 
-  const rem = data.filter(d => d.ports.some(p => !answeredPorts.has(p)));
-  if (!rem.length) return endQuiz();
+  const rem = data.filter(d=> d.ports.some(p=> !answeredPorts.has(p)));
+  if(!rem.length) return endQuiz();
   current = rem[Math.floor(Math.random()*rem.length)];
 
-  if (mode === "proto-to-port") {
+  if(mode==="proto-to-port"){
     questionEl.textContent = `¿Qué puerto usa ${current.proto}?`;
   } else {
-    const un = current.ports.filter(p => !answeredPorts.has(p));
+    const un = current.ports.filter(p=> !answeredPorts.has(p));
     current.port = un[Math.floor(Math.random()*un.length)];
     questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
   }
 
-  if (flashMode) startFlashTimer();
+  if(flashMode) startFlashTimer();
   else timerEl.textContent = "";
 }
 
-// —– Comprobación de respuesta —–
+// —– Comprobar respuesta —–
 function checkAnswer(e){
   e.preventDefault();
   const raw = answerIn.value.trim();
-  if (!raw) {
+  if(!raw){
     resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
     resultEl.className   = "result incorrect";
     return;
   }
-  if (raw === lastRawInput) {
+  if(raw===lastRawInput){
     resultEl.textContent = "✏️ Cambia tu respuesta para volver a comprobar.";
     resultEl.className   = "result incorrect";
     return;
@@ -143,76 +141,108 @@ function checkAnswer(e){
   const isCorrect = mode==="proto-to-port"
     ? current.ports.includes(input)
     : current.proto.split("/").some(p=>
-        p.replace(/[^a-z0-9]/gi,"").toLowerCase().trim()===input
+        p.replace(/[^a-z0-9]/gi,"").toLowerCase()===input
       );
 
-  if (isCorrect && flashMode) stopFlashTimer();
+  if(isCorrect && flashMode) stopFlashTimer();
 
   expEl.innerHTML = `
-    🔢 <strong>Puerto(s):</strong> ${current.ports.join(", ")}<br>
-    🧠 <strong>${current.proto}:</strong> ${current.note}
+    <strong>Puerto(s):</strong> ${current.ports.join(", ")}<br>
+    <strong>${current.proto}:</strong> ${current.note}
   `;
 
-  if (isCorrect) {
+  if(isCorrect){
     resultEl.textContent = "✅ ¡Correcto!";
     resultEl.className   = "result correct";
     current.ports.forEach(p=> answeredPorts.add(p));
     correct++;
   } else {
-    resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
+    resultEl.textContent = "❌ Incorrecto.";
     resultEl.className   = "result incorrect";
     wrong++;
   }
 
-  nextBtn.disabled = false;
+  // sólo habilitamos Siguiente si es correcto
+  nextBtn.disabled = !isCorrect;
   updateScore();
   logHistory(raw, isCorrect);
 }
 
+// —– Registrar historial —–
+function logHistory(given, isCorrect){
+  const correctText = mode==="proto-to-port"
+    ? current.ports.join(", ")
+    : current.proto;
+  history.push({question: questionEl.textContent, given, correct: correctText, isCorrect});
+  // opcional: mostrar últimas 10 en el widget durante el quiz
+  historyEl.innerHTML = `<ul>${
+    history.slice(-10).map(h=>
+      `<li>${h.question} ➜ tu: ${h.given||"(vacío)"} | correcto: ${h.correct} ${h.isCorrect?"✅":"❌"}</li>`
+    ).join("")
+  }</ul>`;
+}
+
 // —– Final del quiz —–
 function endQuiz(){
-  // 1) marcamos que el quiz terminó
   document.body.classList.add("quiz-over");
-
   stopFlashTimer();
   quizCard.style.display    = "none";
   summaryCard.style.display = "block";
-  const total = correct + wrong;
-  const pct   = total ? Math.round((correct/total)*100) : 0;
+
+  const total = correct+wrong;
+  const pct   = total ? Math.round((correct/total)*100):0;
   summaryStats.innerHTML = `
     <p>✅ Aciertos: <strong>${correct}</strong></p>
     <p>❌ Errores: <strong>${wrong}</strong></p>
     <p>📊 Precisión: <strong>${pct}%</strong></p>
   `;
-  summaryFailures.innerHTML = history.filter(h=>h.includes("❌")).length
-    ? `<ul>${history.filter(h=>h.includes("❌")).map(h=>`<li>${h}</li>`).join("")}</ul>`
-    : '<p>🎉 ¡No fallaste ninguna!</p>';
+
+  const fails = history.filter(h=>!h.isCorrect);
+  if(fails.length){
+    summaryFailures.innerHTML = `<h3>❌ Fallos:</h3><ul>${
+      fails.map(f=>`
+        <li>
+          ${f.question}<br>
+          Tu: <strong>${f.given}</strong><br>
+          Correcto: <strong>${f.correct}</strong>
+        </li>
+      `).join("")
+    }</ul>`;
+  } else {
+    summaryFailures.innerHTML = '<p>🎉 ¡No fallaste ninguna!</p>';
+  }
 }
 
-// —– Utilidades y Listeners —–
+// —– Utilidades y listeners —–
 function updateScore(){
-  const total = correct + wrong;
-  const pct   = total ? Math.round((correct/total)*100) : 0;
+  const total = correct+wrong;
+  const pct   = total?Math.round((correct/total)*100):0;
   scoreEl.innerHTML = `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
 }
-function logHistory(input, ok){
-  history.push(`${questionEl.textContent} ➜ ${input||"(vacío)"} | ${ok?"✅":"❌"}`);
-  historyEl.innerHTML = `<ul>${history.slice(-10).map(h=>`<li>${h}</li>`).join("")}</ul>`;
+function toggleTheme(){
+  const root = document.documentElement,
+        bg   = getComputedStyle(root).getPropertyValue("--bg").trim();
+  if(bg==="#000"){
+    root.style.setProperty("--bg","#fff");
+    root.style.setProperty("--text","#000");
+    root.style.setProperty("--card-bg","rgba(255,255,255,0.85)");
+    root.style.setProperty("--border","#000");
+  } else {
+    root.style.setProperty("--bg","#000");
+    root.style.setProperty("--text","#0f0");
+    root.style.setProperty("--card-bg","rgba(0,0,0,0.85)");
+    root.style.setProperty("--border","#0f0");
+  }
 }
 
-startBtn.addEventListener("click", startQuiz);
-checkBtn.addEventListener("click", checkAnswer);
-nextBtn.addEventListener("click", nextQuestion);
-endBtn.addEventListener("click", endQuiz);
-flashBtn.addEventListener("click", ()=>{
+startBtn.addEventListener("click",   startQuiz);
+checkBtn.addEventListener("click",   checkAnswer);
+nextBtn.addEventListener("click",    nextQuestion);
+endBtn.addEventListener("click",     endQuiz);
+flashBtn.addEventListener("click",   ()=>{
   flashMode = !flashMode;
-  flashMode ? startFlashTimer() : stopFlashTimer();
+  flashMode? startFlashTimer() : stopFlashTimer();
 });
-themeBtn.addEventListener("click", toggleTheme);
-restartBtn.addEventListener("click", ()=>location.reload());
-answerIn.addEventListener("input", ()=>{
-  lastRawInput = null;
-  resultEl.textContent = "";
-});
-
-// (Asegúrate de incluir aquí tu función toggleTheme si la usas)
+themeBtn.addEventListener("click",   toggleTheme);
+restartBtn.addEventListener("click", ()=> location.reload());
+answerIn.addEventListener("input",   ()=>{ lastRawInput = null; resultEl.textContent = ""; });
