@@ -1,26 +1,30 @@
 window.onload = function () {
   const data = [
-    { proto: "FTP", ports: ["20", "21"], note: "20 = Data, 21 = Control" },
-    { proto: "SSH / SFTP", ports: ["22"], note: "Acceso remoto seguro" },
-    { proto: "Telnet", ports: ["23"], note: "No cifrado, acceso remoto" },
-    { proto: "SMTP", ports: ["25", "465", "587"], note: "Correo saliente (465 = SSL, 587 = STARTTLS)" },
-    { proto: "DNS", ports: ["53"], note: "Resolución de nombres (UDP/TCP)" },
-    { proto: "TFTP", ports: ["69"], note: "Transferencia simple (UDP)" },
-    { proto: "HTTP", ports: ["80"], note: "Navegación no segura" },
-    { proto: "Kerberos", ports: ["88"], note: "Autenticación centralizada" },
-    { proto: "POP3", ports: ["110", "995"], note: "Recibir correo (995 = SSL)" },
-    { proto: "NNTP", ports: ["119"], note: "Transferencia de noticias" },
-    { proto: "RPC", ports: ["135"], note: "Llamadas remotas (Windows)" },
-    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "137=Name, 138=Datagram, 139=Session" },
-    { proto: "IMAP", ports: ["143", "993"], note: "Correo en servidor (993 = SSL)" },
-    { proto: "SNMP", ports: ["161", "162"], note: "Monitoreo de red (162 = trap)" },
-    { proto: "LDAP", ports: ["389", "636"], note: "389 = sin cifrar, 636 = LDAPS" },
-    { proto: "HTTPS", ports: ["443"], note: "Web segura con TLS/SSL" },
-    { proto: "SMB", ports: ["445"], note: "Compartición de archivos en red Windows" },
-    { proto: "Syslog", ports: ["514", "6514"], note: "514 = UDP, 6514 = TLS" },
-    { proto: "SQL Server", ports: ["1433"], note: "Microsoft SQL" },
-    { proto: "RADIUS", ports: ["1645", "1646", "1812", "1813"], note: "1812 = Auth, 1813 = Acct" },
-    { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol" }
+    { proto: "FTP", ports: ["21"], note: "File Transfer Protocol (FTP)" },
+    { proto: "SSH / CSP / SFTP", ports: ["22"], note: "Secure Shell y transferencia de archivos cifrada (TCP)" },
+    { proto: "Telnet", ports: ["23"], note: "Protocolo de acceso remoto no cifrado (TCP)" },
+    { proto: "SMTP / SMTPS", ports: ["25", "465", "587"], note: "Correo saliente seguro (465=SSL, 587=STARTTLS)" },
+    { proto: "DNS", ports: ["53"], note: "Domain Name System (TCP y UDP)" },
+    { proto: "DHCP", ports: ["67", "68"], note: "Asignación dinámica de direcciones IP (UDP)" },
+    { proto: "TFTP", ports: ["69"], note: "Trivial File Transfer Protocol (UDP)" },
+    { proto: "HTTP", ports: ["80"], note: "Protocolo de transferencia web (TCP)" },
+    { proto: "Kerberos", ports: ["88"], note: "Protocolo de autenticación (UDP)" },
+    { proto: "POP3 / POP3S", ports: ["110", "995"], note: "Correo entrante (995 = SSL/TLS)" },
+    { proto: "NNTP", ports: ["119"], note: "Protocolo de noticias en red (TCP)" },
+    { proto: "RPC", ports: ["135"], note: "Remote Procedure Call (TCP/UDP)" },
+    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "137=Name, 138=Datagram, 139=Session (TCP/UDP)" },
+    { proto: "IMAP / IMAPS", ports: ["143", "993"], note: "Correo remoto (993=SSL)" },
+    { proto: "LDAP / LDAPS", ports: ["389", "636"], note: "Acceso a directorios (636=TLS)" },
+    { proto: "SNMP / Trap", ports: ["161", "162"], note: "Gestión de red y monitoreo (UDP)" },
+    { proto: "HTTPS", ports: ["443"], note: "HTTP sobre TLS/SSL (TCP)" },
+    { proto: "SMB", ports: ["445"], note: "Compartición de archivos (TCP)" },
+    { proto: "Syslog / Syslog TLS", ports: ["514", "6514"], note: "Registro de eventos (514=UDP, 6514=TLS/TCP)" },
+    { proto: "Microsoft SQL", ports: ["1433"], note: "Base de datos Microsoft SQL Server (TCP)" },
+    { proto: "MySQL", ports: ["3306"], note: "Base de datos MySQL (TCP)" },
+    { proto: "Oracle SQL", ports: ["1521"], note: "Base de datos Oracle (TCP)" },
+    { proto: "RADIUS (TCP)", ports: ["1645", "1646"], note: "RADIUS tradicional para autenticación (TCP)" },
+    { proto: "RADIUS (UDP)", ports: ["1812", "1813"], note: "RADIUS estándar (UDP)" },
+    { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
   ];
 
   let current = {};
@@ -42,15 +46,7 @@ window.onload = function () {
 
   function nextQuestion() {
     const remaining = data.filter(item => !answered.has(item.proto));
-    if (remaining.length === 0) {
-      document.getElementById("question").textContent = "🎉 ¡Completaste todas las preguntas!";
-      document.getElementById("answerInput").style.display = "none";
-      document.getElementById("checkBtn").style.display = "none";
-      document.getElementById("nextBtn").style.display = "none";
-      document.getElementById("endBtn").style.display = "none";
-      stopFlashTimer();
-      return;
-    }
+    if (remaining.length === 0) return endQuiz();
 
     const index = Math.floor(Math.random() * remaining.length);
     current = remaining[index];
@@ -85,6 +81,16 @@ window.onload = function () {
       isCorrect = input === current.proto.toLowerCase() || input.includes(current.proto.toLowerCase().split(" ")[0]);
     }
 
+    const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
+    const portsList = current.ports.join(", ");
+    explanation.innerHTML = `
+      🔢 <strong>Puerto(s): ${portsList}</strong><br>
+      🧠 <strong>${current.proto}</strong>: ${current.note}<br>
+      🔗 <a href="https://www.cbtnuggets.com/common-ports/what-is-port-${portLink}" target="_blank">
+        Ver en CBT Nuggets (puerto ${portLink})
+      </a>
+    `;
+
     if (isCorrect) {
       result.textContent = "✅ ¡Correcto!";
       result.className = "result correct";
@@ -97,16 +103,6 @@ window.onload = function () {
       result.className = "result incorrect";
       wrong++;
     }
-
-    const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
-    const portsList = current.ports.join(", ");
-    explanation.innerHTML = `
-      🔢 <strong>Puerto(s): ${portsList}</strong><br>
-      🧠 <strong>${current.proto}</strong>: ${current.note}<br>
-      🔗 <a href="https://www.cbtnuggets.com/common-ports/what-is-port-${portLink}" target="_blank">
-        Ver en CBT Nuggets (puerto ${portLink})
-      </a>
-    `;
 
     updateScore();
     logHistory(input, isCorrect);
@@ -171,10 +167,28 @@ window.onload = function () {
   function endQuiz() {
     stopFlashTimer();
     document.getElementById("quizCard").style.display = "none";
-    document.getElementById("score").innerHTML += `<br>📘 Quiz finalizado. ¡Buen trabajo!`;
+    document.getElementById("summaryCard").style.display = "block";
+
+    const total = correct + wrong;
+    const pct = total ? Math.round((correct / total) * 100) : 0;
+
+    document.getElementById("summaryStats").innerHTML = `
+      <p>✅ Aciertos: <strong>${correct}</strong></p>
+      <p>❌ Errores: <strong>${wrong}</strong></p>
+      <p>📊 Precisión: <strong>${pct}%</strong></p>
+    `;
+
+    const failures = history
+      .filter(h => h.includes("❌"))
+      .map(item => `<li>${item}</li>`).join("");
+
+    document.getElementById("summaryFailures").innerHTML = `
+      <h3>❌ Preguntas fallidas:</h3>
+      <ul>${failures || "<li>🎉 ¡No fallaste ninguna!</li>"}</ul>
+    `;
   }
 
-  // Exponer globalmente
+  // Exponer funciones globales
   window.startQuiz = startQuiz;
   window.checkAnswer = checkAnswer;
   window.nextQuestion = nextQuestion;
