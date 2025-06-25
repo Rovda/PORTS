@@ -25,10 +25,39 @@ historyEl.style.display = "none";
 
 // —– Datos —–
 const data = [
-  { proto: "FTP", ports: ["21","20"], note: "File Transfer Protocol (FTP)" },
-  { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
-  // ... el resto de datos ...
-  { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
+    { proto: "FTP", ports: ["21", "20"], note: "File Transfer Protocol (FTP)" },
+    { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
+    { proto: "SFTP", ports: ["22"], note: "FTP sobre SSH (cifrado)" },
+    { proto: "Telnet", ports: ["23"], note: "Acceso remoto no cifrado (inseguro)" },
+    { proto: "SMTP", ports: ["25"], note: "Correo saliente sin cifrar (TCP)" },
+    { proto: "DNS", ports: ["53"], note: "Resolución de nombres (TCP y UDP)" },
+    { proto: "DHCP", ports: ["67", "68"], note: "Asignación dinámica de direcciones IP (UDP)" },
+    { proto: "TFTP", ports: ["69"], note: "Protocolo simple de transferencia de archivos (UDP)" },
+    { proto: "HTTP", ports: ["80"], note: "Navegación web sin cifrar (inseguro)" },
+    { proto: "Kerberos", ports: ["88"], note: "Sistema de autenticación de red (UDP)" },
+    { proto: "POP3", ports: ["110"], note: "Correo entrante sin cifrar (TCP)" },
+    { proto: "NNTP", ports: ["119"], note: "Protocolo de noticias (TCP)" },
+    { proto: "RPC", ports: ["135"], note: "Remote Procedure Call (TCP y UDP)" },
+    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "137=Name, 138=Datagram, 139=Session" },
+    { proto: "IMAP", ports: ["143"], note: "Acceso remoto a correo sin cifrar (TCP)" },
+    { proto: "SNMP", ports: ["161"], note: "Gestión de red (UDP)" },
+    { proto: "SNMP Trap", ports: ["162"], note: "Trampas de SNMP (UDP)" },
+    { proto: "LDAP", ports: ["389"], note: "Acceso a directorios sin cifrado (TCP)" },
+    { proto: "HTTPS", ports: ["443"], note: "Navegación web cifrada con SSL/TLS" },
+    { proto: "SMB", ports: ["445"], note: "Compartición de archivos (TCP)" },
+    { proto: "SMTP (SSL)", ports: ["465"], note: "SMTP sobre SSL (obsoleto pero aún usado)" },
+    { proto: "SMTP (STARTTLS)", ports: ["587"], note: "SMTP con cifrado STARTTLS (recomendado)" },
+    { proto: "Syslog", ports: ["514"], note: "Registro de eventos del sistema (UDP)" },
+    { proto: "LDAPS", ports: ["636"], note: "LDAP sobre TLS (seguro)" },
+    { proto: "IMAPS", ports: ["993"], note: "IMAP sobre SSL/TLS (seguro)" },
+    { proto: "POP3S", ports: ["995"], note: "POP3 sobre SSL/TLS (seguro)" },
+    { proto: "Microsoft SQL", ports: ["1433"], note: "Base de datos Microsoft SQL Server" },
+    { proto: "Oracle SQL", ports: ["1521"], note: "Base de datos Oracle" },
+    { proto: "MySQL", ports: ["3306"], note: "Base de datos MySQL" },
+    { proto: "RADIUS (TCP)", ports: ["1645", "1646"], note: "RADIUS heredado (TCP)" },
+    { proto: "RADIUS (UDP)", ports: ["1812", "1813"], note: "RADIUS estándar (UDP)" },
+    { proto: "Syslog TLS", ports: ["6514"], note: "Syslog seguro con TLS (TCP)" },
+    { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
 ];
 
 // —– Estado —–
