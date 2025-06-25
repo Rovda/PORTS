@@ -1,6 +1,6 @@
 window.onload = function () {
   const data = [
-    { proto: "FTP", ports: ["21"], note: "File Transfer Protocol (FTP)" },
+    { proto: "FTP", ports: ["21", "20"], note: "File Transfer Protocol (FTP)" },
     { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
     { proto: "SFTP", ports: ["22"], note: "FTP sobre SSH (cifrado)" },
     { proto: "Telnet", ports: ["23"], note: "Acceso remoto no cifrado (inseguro)" },
@@ -21,6 +21,8 @@ window.onload = function () {
     { proto: "HTTPS", ports: ["443"], note: "Navegación web cifrada con SSL/TLS" },
     { proto: "SMB", ports: ["445"], note: "Compartición de archivos (TCP)" },
     { proto: "SMTPS", ports: ["465", "587"], note: "SMTP con cifrado: 465 (SSL), 587 (STARTTLS)" },
+    { proto: "SMTP (SSL)", ports: ["465"], note: "SMTP sobre SSL (obsoleto pero aún usado)" },
+    { proto: "SMTP (STARTTLS)", ports: ["587"], note: "SMTP con cifrado STARTTLS (recomendado)" },
     { proto: "Syslog", ports: ["514"], note: "Registro de eventos del sistema (UDP)" },
     { proto: "LDAPS", ports: ["636"], note: "LDAP sobre TLS (seguro)" },
     { proto: "IMAPS", ports: ["993"], note: "IMAP sobre SSL/TLS (seguro)" },
