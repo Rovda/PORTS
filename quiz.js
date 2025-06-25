@@ -49,8 +49,6 @@ window.onload = function () {
   // Vincular eventos
   document.getElementById("checkBtn").addEventListener("click", checkAnswer);
   document.getElementById("nextBtn").addEventListener("click", nextQuestion);
-
-  // Resetear lastRawInput cuando el usuario edita la respuesta
   document.getElementById("answerInput").addEventListener("input", () => {
     lastRawInput = null;
     document.getElementById("result").textContent = "";
@@ -66,6 +64,7 @@ window.onload = function () {
   function nextQuestion() {
     alreadyAnswered = false;
     lastRawInput = null;
+    clearInterval(flashTimer);
     const remaining = data.filter(item =>
       item.ports.some(port => !answeredPorts.has(port))
     );
@@ -136,7 +135,7 @@ window.onload = function () {
       current.ports.forEach(p => answeredPorts.add(p));
       correct++;
       alreadyAnswered = true;
-      stopFlashTimer();
+      clearInterval(flashTimer);
     } else {
       resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
       resultEl.className = "result incorrect";
@@ -146,6 +145,24 @@ window.onload = function () {
 
     updateScore();
     logHistory(raw, isCorrect);
+  }
+
+  function startFlashTimer() {
+    timeLeft = 20;
+    document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
+    flashTimer = setInterval(() => {
+      timeLeft--;
+      document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
+      if (timeLeft <= 0) {
+        clearInterval(flashTimer);
+        endQuiz();            // ← Aquí cerramos el quiz al agotarse el tiempo
+      }
+    }, 1000);
+  }
+
+  function stopFlashTimer() {
+    clearInterval(flashTimer);
+    document.getElementById("timer").textContent = "";
   }
 
   function updateScore() {
@@ -161,6 +178,25 @@ window.onload = function () {
     const list = history.slice(-10).map(h => `<li>${h}</li>`).join("");
     document.getElementById("history").innerHTML =
       `<strong>🧾 Últimas respuestas:</strong><ul>${list}</ul>`;
+  }
+
+  function endQuiz() {
+    clearInterval(flashTimer);
+    document.getElementById("quizCard").style.display    = "none";
+    document.getElementById("summaryCard").style.display = "block";
+    const total = correct + wrong;
+    const pct   = total ? Math.round((correct / total) * 100) : 0;
+    document.getElementById("summaryStats").innerHTML = `
+      <p>✅ Aciertos: <strong>${correct}</strong></p>
+      <p>❌ Errores: <strong>${wrong}</strong></p>
+      <p>📊 Precisión: <strong>${pct}%</strong></p>
+    `;
+    const fails = history.filter(h => h.includes("❌"))
+                         .map(h => `<li>${h}</li>`).join("");
+    document.getElementById("summaryFailures").innerHTML = `
+      <h3>❌ Preguntas fallidas:</h3>
+      <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
+    `;
   }
 
   function toggleTheme() {
@@ -181,57 +217,17 @@ window.onload = function () {
 
   function toggleFlashMode() {
     flashMode = !flashMode;
-    alert(flashMode
-      ? '⚡ Modo Flash activado (20s por pregunta)'
-      : '⚡ Modo Flash desactivado'
+    alert(
+      flashMode
+        ? '⚡ Modo Flash activado (20s por pregunta)'
+        : '⚡ Modo Flash desactivado'
     );
-  }
-
-  function startFlashTimer() {
-    stopFlashTimer();
-    timeLeft = 20;
-    document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
-    flashTimer = setInterval(() => {
-      timeLeft--;
-      document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
-      if (timeLeft <= 0) {
-        stopFlashTimer();
-        document.getElementById("result").textContent = "⏱️ Tiempo agotado";
-        document.getElementById("result").className = "result incorrect";
-        document.getElementById("nextBtn").disabled = false;
-        wrong++;
-        updateScore();
-      }
-    }, 1000);
-  }
-
-  function stopFlashTimer() {
-    clearInterval(flashTimer);
-    document.getElementById("timer").textContent = "";
-  }
-
-  function endQuiz() {
-    stopFlashTimer();
-    document.getElementById("quizCard").style.display    = "none";
-    document.getElementById("summaryCard").style.display = "block";
-    const total = correct + wrong;
-    const pct   = total ? Math.round((correct / total) * 100) : 0;
-    document.getElementById("summaryStats").innerHTML = `
-      <p>✅ Aciertos: <strong>${correct}</strong></p>
-      <p>❌ Errores: <strong>${wrong}</strong></p>
-      <p>📊 Precisión: <strong>${pct}%</strong></p>
-    `;
-    const fails = history.filter(h => h.includes("❌"))
-                         .map(h => `<li>${h}</li>`).join("");
-    document.getElementById("summaryFailures").innerHTML = `
-      <h3>❌ Preguntas fallidas:</h3>
-      <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
-    `;
   }
 
   // Exponer funciones globales
   window.startQuiz       = startQuiz;
   window.nextQuestion    = nextQuestion;
+  window.checkAnswer     = checkAnswer;
   window.toggleTheme     = toggleTheme;
   window.toggleFlashMode = toggleFlashMode;
   window.endQuiz         = endQuiz;
