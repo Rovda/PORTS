@@ -11,6 +11,7 @@
 
 <h1>🔐 Quiz de Puertos – CompTIA Security+</h1>
 
+<!-- Pantalla de inicio -->
 <div class="card" id="startCard">
   <label for="mode">Selecciona el tipo de test:</label><br>
   <select id="mode">
@@ -22,6 +23,7 @@
   <button onclick="toggleFlashMode()">⚡ Modo Flash (20s)</button>
 </div>
 
+<!-- Pantalla del quiz -->
 <div class="card" id="quizCard" style="display: none;">
   <div class="question" id="question">Pregunta aquí</div>
   <input type="text" id="answerInput" placeholder="Tu respuesta..." />
@@ -34,10 +36,11 @@
   <div class="explanation" id="explanation"></div>
 </div>
 
+<!-- Puntuación y respuestas recientes -->
 <div class="score" id="score"></div>
 <div class="history" id="history"></div>
 
-<!-- ✅ Resumen final -->
+<!-- Vista de resumen final -->
 <div class="card" id="summaryCard" style="display: none;">
   <h2>📘 Resumen del Quiz</h2>
   <div id="summaryStats"></div>
@@ -45,6 +48,7 @@
   <button onclick="location.reload()">🔄 Reiniciar</button>
 </div>
 
+<!-- Código JavaScript -->
 <script src="quiz.js"></script>
 </body>
 </html>
