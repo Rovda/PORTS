@@ -43,10 +43,9 @@ window.onload = function () {
   let flashMode = false;
   let flashTimer = null;
   let timeLeft = 20;
-  let alreadyAnswered = false;
   let lastRawInput = null;
 
-  // Vincular eventos
+  // Bind event listeners
   document.getElementById("checkBtn").addEventListener("click", checkAnswer);
   document.getElementById("nextBtn").addEventListener("click", nextQuestion);
   document.getElementById("answerInput").addEventListener("input", () => {
@@ -54,24 +53,22 @@ window.onload = function () {
     document.getElementById("result").textContent = "";
   });
 
-  function startQuiz() {
+  window.startQuiz = function () {
     mode = document.getElementById("mode").value;
     document.getElementById("startCard").style.display = "none";
     document.getElementById("quizCard").style.display = "block";
     nextQuestion();
-  }
+  };
 
-  function nextQuestion() {
-    alreadyAnswered = false;
+  window.nextQuestion = function () {
+    stopFlashTimer();
     lastRawInput = null;
-    clearInterval(flashTimer);
     const remaining = data.filter(item =>
       item.ports.some(port => !answeredPorts.has(port))
     );
     if (!remaining.length) return endQuiz();
 
     current = remaining[Math.floor(Math.random() * remaining.length)];
-
     if (mode === "proto-to-port") {
       document.getElementById("question").textContent =
         `¿Qué puerto usa ${current.proto}?`;
@@ -88,13 +85,13 @@ window.onload = function () {
     document.getElementById("nextBtn").disabled = true;
     document.getElementById("timer").textContent = "";
     if (flashMode) startFlashTimer();
-  }
+  };
 
   function checkAnswer(event) {
     event.preventDefault();
     const raw = document.getElementById("answerInput").value.trim();
     const resultEl = document.getElementById("result");
-    const expEl    = document.getElementById("explanation");
+    const expEl = document.getElementById("explanation");
 
     if (!raw) {
       resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
@@ -128,24 +125,46 @@ window.onload = function () {
       </a>
     `;
 
+    stopFlashTimer();
     if (isCorrect) {
       resultEl.textContent = "✅ ¡Correcto!";
       resultEl.className = "result correct";
-      document.getElementById("nextBtn").disabled = false;
       current.ports.forEach(p => answeredPorts.add(p));
       correct++;
-      alreadyAnswered = true;
-      clearInterval(flashTimer);
     } else {
       resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
       resultEl.className = "result incorrect";
       wrong++;
-      document.getElementById("nextBtn").disabled = false;
     }
-
+    document.getElementById("nextBtn").disabled = false;
     updateScore();
     logHistory(raw, isCorrect);
   }
+
+  window.toggleTheme = function () {
+    const root = document.documentElement;
+    const bg = getComputedStyle(root).getPropertyValue('--bg').trim();
+    if (bg === '#000') {
+      root.style.setProperty('--bg', '#fff');
+      root.style.setProperty('--text', '#000');
+      root.style.setProperty('--card-bg', 'rgba(255,255,255,0.85)');
+      root.style.setProperty('--border', '#000');
+    } else {
+      root.style.setProperty('--bg', '#000');
+      root.style.setProperty('--text', '#0f0');
+      root.style.setProperty('--card-bg', 'rgba(0,0,0,0.85)');
+      root.style.setProperty('--border', '#0f0');
+    }
+  };
+
+  window.toggleFlashMode = function () {
+    flashMode = !flashMode;
+    alert(
+      flashMode
+        ? '⚡ Modo Flash activado (20s por pregunta)'
+        : '⚡ Modo Flash desactivado'
+    );
+  };
 
   function startFlashTimer() {
     timeLeft = 20;
@@ -154,8 +173,8 @@ window.onload = function () {
       timeLeft--;
       document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
       if (timeLeft <= 0) {
-        clearInterval(flashTimer);
-        endQuiz();            // ← Aquí cerramos el quiz al agotarse el tiempo
+        stopFlashTimer();
+        endQuiz();
       }
     }, 1000);
   }
@@ -167,7 +186,7 @@ window.onload = function () {
 
   function updateScore() {
     const total = correct + wrong;
-    const pct   = total ? Math.round((correct / total) * 100) : 0;
+    const pct = total ? Math.round((correct / total) * 100) : 0;
     document.getElementById("score").innerHTML =
       `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
   }
@@ -180,55 +199,24 @@ window.onload = function () {
       `<strong>🧾 Últimas respuestas:</strong><ul>${list}</ul>`;
   }
 
-  function endQuiz() {
-    clearInterval(flashTimer);
-    document.getElementById("quizCard").style.display    = "none";
+  window.endQuiz = function () {
+    stopFlashTimer();
+    document.getElementById("quizCard").style.display = "none";
     document.getElementById("summaryCard").style.display = "block";
     const total = correct + wrong;
-    const pct   = total ? Math.round((correct / total) * 100) : 0;
+    const pct = total ? Math.round((correct / total) * 100) : 0;
     document.getElementById("summaryStats").innerHTML = `
       <p>✅ Aciertos: <strong>${correct}</strong></p>
       <p>❌ Errores: <strong>${wrong}</strong></p>
       <p>📊 Precisión: <strong>${pct}%</strong></p>
     `;
-    const fails = history.filter(h => h.includes("❌"))
-                         .map(h => `<li>${h}</li>`).join("");
+    const fails = history
+      .filter(h => h.includes("❌"))
+      .map(h => `<li>${h}</li>`)
+      .join("");
     document.getElementById("summaryFailures").innerHTML = `
       <h3>❌ Preguntas fallidas:</h3>
       <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
     `;
-  }
-
-  function toggleTheme() {
-    const root = document.documentElement;
-    const bg   = getComputedStyle(root).getPropertyValue('--bg').trim();
-    if (bg === '#000') {
-      root.style.setProperty('--bg', '#fff');
-      root.style.setProperty('--text', '#000');
-      root.style.setProperty('--card-bg', 'rgba(255,255,255,0.85)');
-      root.style.setProperty('--border', '#000');
-    } else {
-      root.style.setProperty('--bg', '#000');
-      root.style.setProperty('--text', '#0f0');
-      root.style.setProperty('--card-bg', 'rgba(0,0,0,0.85)');
-      root.style.setProperty('--border', '#0f0');
-    }
-  }
-
-  function toggleFlashMode() {
-    flashMode = !flashMode;
-    alert(
-      flashMode
-        ? '⚡ Modo Flash activado (20s por pregunta)'
-        : '⚡ Modo Flash desactivado'
-    );
-  }
-
-  // Exponer funciones globales
-  window.startQuiz       = startQuiz;
-  window.nextQuestion    = nextQuestion;
-  window.checkAnswer     = checkAnswer;
-  window.toggleTheme     = toggleTheme;
-  window.toggleFlashMode = toggleFlashMode;
-  window.endQuiz         = endQuiz;
+  };
 };
