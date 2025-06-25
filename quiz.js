@@ -81,22 +81,20 @@ window.onload = function () {
   }
 
   function checkAnswer() {
-    if (alreadyAnswered && document.getElementById("nextBtn").disabled === false) return;
-
     const rawInput = document.getElementById("answerInput").value.trim();
-    if (!rawInput) {
-  document.getElementById("result").textContent = "⚠️ Por favor escribe una respuesta.";
-  document.getElementById("result").className = "result incorrect";
-  return; // ❌ NO marcamos como respondida todavía
-}
-
-// ✅ Solo marcamos como respondida si hay entrada válida
-alreadyAnswered = true;
-
-    const input = rawInput.toLowerCase();
     const result = document.getElementById("result");
     const explanation = document.getElementById("explanation");
 
+    if (!rawInput) {
+      result.textContent = "⚠️ Por favor escribe una respuesta.";
+      result.className = "result incorrect";
+      return;
+    }
+
+    if (alreadyAnswered) return;
+    alreadyAnswered = true;
+
+    const input = rawInput.toLowerCase();
     let isCorrect = false;
 
     if (mode === "proto-to-port") {
