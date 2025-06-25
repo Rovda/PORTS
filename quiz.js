@@ -13,11 +13,11 @@ window.onload = function () {
     { proto: "POP3", ports: ["110"], note: "Correo entrante sin cifrar (TCP)" },
     { proto: "NNTP", ports: ["119"], note: "Protocolo de noticias (TCP)" },
     { proto: "RPC", ports: ["135"], note: "Remote Procedure Call (TCP y UDP)" },
-    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "Nombre (137), Datagramas (138), Sesión (139)" },
+    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "137=Name, 138=Datagram, 139=Session" },
     { proto: "IMAP", ports: ["143"], note: "Acceso remoto a correo sin cifrar (TCP)" },
     { proto: "SNMP", ports: ["161"], note: "Gestión de red (UDP)" },
     { proto: "SNMP Trap", ports: ["162"], note: "Trampas de SNMP (UDP)" },
-    { proto: "LDAP", ports: ["389"], note: "Acceso a directorios sin cifrar (TCP)" },
+    { proto: "LDAP", ports: ["389"], note: "Acceso a directorios sin cifrado (TCP)" },
     { proto: "HTTPS", ports: ["443"], note: "Navegación web cifrada con SSL/TLS" },
     { proto: "SMB", ports: ["445"], note: "Compartición de archivos (TCP)" },
     { proto: "SMTPS", ports: ["465", "587"], note: "SMTP con cifrado: 465 (SSL), 587 (STARTTLS)" },
@@ -43,6 +43,7 @@ window.onload = function () {
   let flashMode = false;
   let flashTimer = null;
   let timeLeft = 20;
+  let alreadyAnswered = false;
 
   function startQuiz() {
     mode = document.getElementById("mode").value;
@@ -52,6 +53,7 @@ window.onload = function () {
   }
 
   function nextQuestion() {
+    alreadyAnswered = false;
     const remaining = data.filter(item => !answered.has(item.proto));
     if (remaining.length === 0) return endQuiz();
 
@@ -76,6 +78,9 @@ window.onload = function () {
   }
 
   function checkAnswer() {
+    if (alreadyAnswered) return;
+    alreadyAnswered = true;
+
     const input = document.getElementById("answerInput").value.trim().toLowerCase();
     const result = document.getElementById("result");
     const explanation = document.getElementById("explanation");
