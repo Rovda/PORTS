@@ -45,14 +45,9 @@ window.onload = function () {
   let timeLeft = 20;
   let alreadyAnswered = false;
 
-  // Evitar que botones hagan submit y enlazar listeners
-  const checkBtn = document.getElementById("checkBtn");
-  checkBtn.type = "button";
-  checkBtn.addEventListener("click", checkAnswer);
-
-  const nextBtn = document.getElementById("nextBtn");
-  nextBtn.type = "button";
-  nextBtn.addEventListener("click", nextQuestion);
+  // Vincular eventos a botones
+  document.getElementById("checkBtn").addEventListener("click", checkAnswer);
+  document.getElementById("nextBtn").addEventListener("click", nextQuestion);
 
   function startQuiz() {
     mode = document.getElementById("mode").value;
@@ -66,23 +61,24 @@ window.onload = function () {
     const remaining = data.filter(item =>
       item.ports.some(port => !answeredPorts.has(port))
     );
-    if (remaining.length === 0) return endQuiz();
+    if (!remaining.length) return endQuiz();
 
-    const index = Math.floor(Math.random() * remaining.length);
-    current = remaining[index];
+    current = remaining[Math.floor(Math.random() * remaining.length)];
 
     if (mode === "proto-to-port") {
-      document.getElementById("question").textContent = `¿Qué puerto usa ${current.proto}?`;
+      document.getElementById("question").textContent =
+        `¿Qué puerto usa ${current.proto}?`;
     } else {
       const unasked = current.ports.filter(p => !answeredPorts.has(p));
       current.port = unasked[Math.floor(Math.random() * unasked.length)];
-      document.getElementById("question").textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
+      document.getElementById("question").textContent =
+        `¿Qué protocolo usa el puerto ${current.port}?`;
     }
 
     document.getElementById("answerInput").value = "";
     document.getElementById("result").textContent = "";
     document.getElementById("explanation").textContent = "";
-    nextBtn.disabled = true;
+    document.getElementById("nextBtn").disabled = true;
     document.getElementById("timer").textContent = "";
 
     if (flashMode) startFlashTimer();
@@ -90,21 +86,19 @@ window.onload = function () {
 
   function checkAnswer(event) {
     event.preventDefault();
-    const rawInput = document.getElementById("answerInput").value.trim();
-    const result = document.getElementById("result");
-    const explanation = document.getElementById("explanation");
+    const raw = document.getElementById("answerInput").value.trim();
+    const resultEl = document.getElementById("result");
+    const expEl = document.getElementById("explanation");
 
-    if (!rawInput) {
-      result.textContent = "⚠️ Por favor escribe una respuesta.";
-      result.className = "result incorrect";
+    if (!raw) {
+      resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
+      resultEl.className = "result incorrect";
       return;
     }
-
     if (alreadyAnswered) return;
 
-    const input = rawInput.toLowerCase().replace(/[^a-z0-9]/gi, "");
+    const input = raw.toLowerCase().replace(/[^a-z0-9]/gi, "");
     let isCorrect = false;
-
     if (mode === "proto-to-port") {
       isCorrect = current.ports.includes(input);
     } else {
@@ -115,9 +109,8 @@ window.onload = function () {
     }
 
     const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
-    const portsList = current.ports.join(", ");
-    explanation.innerHTML = `
-      🔢 <strong>Puerto(s): ${portsList}</strong><br>
+    expEl.innerHTML = `
+      🔢 <strong>Puerto(s): ${current.ports.join(", ")}</strong><br>
       🧠 <strong>${current.proto}</strong>: ${current.note}<br>
       🔗 <a href="https://www.cbtnuggets.com/common-ports/what-is-port-${portLink}" target="_blank">
         Ver en CBT Nuggets (puerto ${portLink})
@@ -125,21 +118,21 @@ window.onload = function () {
     `;
 
     if (isCorrect) {
-      result.textContent = "✅ ¡Correcto!";
-      result.className = "result correct";
-      nextBtn.disabled = false;
+      resultEl.textContent = "✅ ¡Correcto!";
+      resultEl.className = "result correct";
+      document.getElementById("nextBtn").disabled = false;
       current.ports.forEach(p => answeredPorts.add(p));
       correct++;
       alreadyAnswered = true;
       stopFlashTimer();
     } else {
-      result.textContent = "❌ Incorrecto. Intenta de nuevo.";
-      result.className = "result incorrect";
+      resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
+      resultEl.className = "result incorrect";
       wrong++;
     }
 
     updateScore();
-    logHistory(rawInput, isCorrect);
+    logHistory(raw, isCorrect);
   }
 
   function updateScore() {
@@ -149,9 +142,9 @@ window.onload = function () {
       `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
   }
 
-  function logHistory(input, isCorrect) {
+  function logHistory(input, ok) {
     const q = document.getElementById("question").textContent;
-    history.push(`${q} ➜ Respuesta: ${input || "(vacío)"} | ${isCorrect ? "✅" : "❌"}`);
+    history.push(`${q} ➜ Respuesta: ${input || "(vacío)"} | ${ok ? "✅" : "❌"}`);
     const list = history.slice(-10).map(h => `<li>${h}</li>`).join("");
     document.getElementById("history").innerHTML =
       `<strong>🧾 Últimas respuestas:</strong><ul>${list}</ul>`;
@@ -159,28 +152,35 @@ window.onload = function () {
 
   function toggleTheme() {
     const root = document.documentElement;
-    const isDark = root.style.getPropertyValue("--bg") === "#121212" || !root.style.getPropertyValue("--bg");
-    if (isDark) {
-      root.style.setProperty("--bg", "#ffffff");
-      root.style.setProperty("--text", "#000000");
-      root.style.setProperty("--card", "#f5f5f5");
+    const currentBg = getComputedStyle(root).getPropertyValue('--bg').trim();
+
+    if (currentBg === '#000') {
+      // Tema claro
+      root.style.setProperty('--bg', '#fff');
+      root.style.setProperty('--text', '#000');
+      root.style.setProperty('--card-bg', 'rgba(255,255,255,0.85)');
+      root.style.setProperty('--border', '#000');
     } else {
-      root.style.setProperty("--bg", "#121212");
-      root.style.setProperty("--text", "#ffffff");
-      root.style.setProperty("--card", "#1e1e1e");
+      // Tema “hacker”
+      root.style.setProperty('--bg', '#000');
+      root.style.setProperty('--text', '#0f0');
+      root.style.setProperty('--card-bg', 'rgba(0,0,0,0.85)');
+      root.style.setProperty('--border', '#0f0');
     }
   }
 
   function toggleFlashMode() {
     flashMode = !flashMode;
-    alert(flashMode ? "⚡ Modo Flash activado (20s por pregunta)" : "Modo Flash desactivado");
+    alert(flashMode
+      ? '⚡ Modo Flash activado (20s por pregunta)'
+      : '⚡ Modo Flash desactivado'
+    );
   }
 
   function startFlashTimer() {
     stopFlashTimer();
     timeLeft = 20;
     document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
-
     flashTimer = setInterval(() => {
       timeLeft--;
       document.getElementById("timer").textContent = `⏱️ Tiempo: ${timeLeft}s`;
@@ -188,7 +188,7 @@ window.onload = function () {
         stopFlashTimer();
         document.getElementById("result").textContent = "⏱️ Tiempo agotado";
         document.getElementById("result").className = "result incorrect";
-        nextBtn.disabled = false;
+        document.getElementById("nextBtn").disabled = false;
         wrong++;
         updateScore();
       }
@@ -212,17 +212,15 @@ window.onload = function () {
       <p>❌ Errores: <strong>${wrong}</strong></p>
       <p>📊 Precisión: <strong>${pct}%</strong></p>
     `;
-
-    const failures = history
-      .filter(h => h.includes("❌"))
-      .map(item => `<li>${item}</li>`).join("");
+    const fails = history.filter(h => h.includes("❌"))
+                         .map(h => `<li>${h}</li>`).join("");
     document.getElementById("summaryFailures").innerHTML = `
       <h3>❌ Preguntas fallidas:</h3>
-      <ul>${failures || "<li>🎉 ¡No fallaste ninguna!</li>"}</ul>
+      <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
     `;
   }
 
-  // Exponer al scope global
+  // Exponer funciones globales
   window.startQuiz = startQuiz;
   window.nextQuestion = nextQuestion;
   window.toggleTheme = toggleTheme;
