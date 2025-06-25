@@ -1,29 +1,36 @@
 window.onload = function () {
   const data = [
     { proto: "FTP", ports: ["21"], note: "File Transfer Protocol (FTP)" },
-    { proto: "SSH / CSP / SFTP", ports: ["22"], note: "Secure Shell y transferencia de archivos cifrada (TCP)" },
-    { proto: "Telnet", ports: ["23"], note: "Protocolo de acceso remoto no cifrado (TCP)" },
-    { proto: "SMTP / SMTPS", ports: ["25", "465", "587"], note: "Correo saliente seguro (465=SSL, 587=STARTTLS)" },
-    { proto: "DNS", ports: ["53"], note: "Domain Name System (TCP y UDP)" },
+    { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
+    { proto: "SFTP", ports: ["22"], note: "FTP sobre SSH (cifrado)" },
+    { proto: "Telnet", ports: ["23"], note: "Acceso remoto no cifrado (inseguro)" },
+    { proto: "SMTP", ports: ["25"], note: "Correo saliente sin cifrar (TCP)" },
+    { proto: "DNS", ports: ["53"], note: "Resolución de nombres (TCP y UDP)" },
     { proto: "DHCP", ports: ["67", "68"], note: "Asignación dinámica de direcciones IP (UDP)" },
-    { proto: "TFTP", ports: ["69"], note: "Trivial File Transfer Protocol (UDP)" },
-    { proto: "HTTP", ports: ["80"], note: "Protocolo de transferencia web (TCP)" },
-    { proto: "Kerberos", ports: ["88"], note: "Protocolo de autenticación (UDP)" },
-    { proto: "POP3 / POP3S", ports: ["110", "995"], note: "Correo entrante (995 = SSL/TLS)" },
-    { proto: "NNTP", ports: ["119"], note: "Protocolo de noticias en red (TCP)" },
-    { proto: "RPC", ports: ["135"], note: "Remote Procedure Call (TCP/UDP)" },
-    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "137=Name, 138=Datagram, 139=Session (TCP/UDP)" },
-    { proto: "IMAP / IMAPS", ports: ["143", "993"], note: "Correo remoto (993=SSL)" },
-    { proto: "LDAP / LDAPS", ports: ["389", "636"], note: "Acceso a directorios (636=TLS)" },
-    { proto: "SNMP / Trap", ports: ["161", "162"], note: "Gestión de red y monitoreo (UDP)" },
-    { proto: "HTTPS", ports: ["443"], note: "HTTP sobre TLS/SSL (TCP)" },
+    { proto: "TFTP", ports: ["69"], note: "Protocolo simple de transferencia de archivos (UDP)" },
+    { proto: "HTTP", ports: ["80"], note: "Navegación web sin cifrar (inseguro)" },
+    { proto: "Kerberos", ports: ["88"], note: "Sistema de autenticación de red (UDP)" },
+    { proto: "POP3", ports: ["110"], note: "Correo entrante sin cifrar (TCP)" },
+    { proto: "NNTP", ports: ["119"], note: "Protocolo de noticias (TCP)" },
+    { proto: "RPC", ports: ["135"], note: "Remote Procedure Call (TCP y UDP)" },
+    { proto: "NetBIOS", ports: ["137", "138", "139"], note: "Nombre (137), Datagramas (138), Sesión (139)" },
+    { proto: "IMAP", ports: ["143"], note: "Acceso remoto a correo sin cifrar (TCP)" },
+    { proto: "SNMP", ports: ["161"], note: "Gestión de red (UDP)" },
+    { proto: "SNMP Trap", ports: ["162"], note: "Trampas de SNMP (UDP)" },
+    { proto: "LDAP", ports: ["389"], note: "Acceso a directorios sin cifrar (TCP)" },
+    { proto: "HTTPS", ports: ["443"], note: "Navegación web cifrada con SSL/TLS" },
     { proto: "SMB", ports: ["445"], note: "Compartición de archivos (TCP)" },
-    { proto: "Syslog / Syslog TLS", ports: ["514", "6514"], note: "Registro de eventos (514=UDP, 6514=TLS/TCP)" },
-    { proto: "Microsoft SQL", ports: ["1433"], note: "Base de datos Microsoft SQL Server (TCP)" },
-    { proto: "MySQL", ports: ["3306"], note: "Base de datos MySQL (TCP)" },
-    { proto: "Oracle SQL", ports: ["1521"], note: "Base de datos Oracle (TCP)" },
-    { proto: "RADIUS (TCP)", ports: ["1645", "1646"], note: "RADIUS tradicional para autenticación (TCP)" },
+    { proto: "SMTPS", ports: ["465", "587"], note: "SMTP con cifrado: 465 (SSL), 587 (STARTTLS)" },
+    { proto: "Syslog", ports: ["514"], note: "Registro de eventos del sistema (UDP)" },
+    { proto: "LDAPS", ports: ["636"], note: "LDAP sobre TLS (seguro)" },
+    { proto: "IMAPS", ports: ["993"], note: "IMAP sobre SSL/TLS (seguro)" },
+    { proto: "POP3S", ports: ["995"], note: "POP3 sobre SSL/TLS (seguro)" },
+    { proto: "Microsoft SQL", ports: ["1433"], note: "Base de datos Microsoft SQL Server" },
+    { proto: "Oracle SQL", ports: ["1521"], note: "Base de datos Oracle" },
+    { proto: "MySQL", ports: ["3306"], note: "Base de datos MySQL" },
+    { proto: "RADIUS (TCP)", ports: ["1645", "1646"], note: "RADIUS heredado (TCP)" },
     { proto: "RADIUS (UDP)", ports: ["1812", "1813"], note: "RADIUS estándar (UDP)" },
+    { proto: "Syslog TLS", ports: ["6514"], note: "Syslog seguro con TLS (TCP)" },
     { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
   ];
 
@@ -78,7 +85,9 @@ window.onload = function () {
     if (mode === "proto-to-port") {
       isCorrect = current.ports.includes(input);
     } else {
-      isCorrect = input === current.proto.toLowerCase() || input.includes(current.proto.toLowerCase().split(" ")[0]);
+      const normalizedInput = input.replace(/[^a-z0-9]/gi, "").toLowerCase();
+      const expected = current.proto.replace(/[^a-z0-9]/gi, "").toLowerCase();
+      isCorrect = normalizedInput === expected;
     }
 
     const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
