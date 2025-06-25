@@ -57,12 +57,36 @@ const data = [
 ];
 
 // —– Estado —–
-let current = {}, correct = 0, wrong = 0;
+let current = {};
+let correct = 0, wrong = 0;
 let answeredPorts = new Set(), history = [];
-let mode = "proto-to-port", flashMode = false, flashTimer = null, timeLeft = 20;
+let mode = "proto-to-port";
+let flashMode = false, flashTimer = null, timeLeft = 20;
 let lastRawInput = null;
 
-// —– Funciones —–
+// —– Funciones Flash —–
+function startFlashTimer(){
+  stopFlashTimer();
+  timeLeft = 20;
+  timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
+  flashTimer = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
+    if (timeLeft <= 0) {
+      stopFlashTimer();
+      alert('⏱️ ¡Tiempo agotado! Finalizando test…');
+      endQuiz();
+    }
+  }, 1000);
+}
+
+function stopFlashTimer(){
+  clearInterval(flashTimer);
+  flashTimer = null;
+  // mantenemos timerEl.textContent para mostrar el tiempo alcanzado
+}
+
+// —– Inicio y navegación —–
 function startQuiz(){
   mode = document.getElementById("mode").value;
   startCard.style.display   = "none";
@@ -75,39 +99,33 @@ function startQuiz(){
 }
 
 function nextQuestion(){
-  // Detenemos cualquier intervalo anterior
-  clearInterval(flashTimer);
-
+  stopFlashTimer();
   lastRawInput = null;
   resultEl.textContent = "";
   expEl.textContent    = "";
   nextBtn.disabled     = true;
   answerIn.value       = "";
 
-  const remaining = data.filter(d => d.ports.some(p => !answeredPorts.has(p)));
-  if (!remaining.length) return endQuiz();
-  current = remaining[Math.floor(Math.random() * remaining.length)];
+  const rem = data.filter(d => d.ports.some(p => !answeredPorts.has(p)));
+  if (!rem.length) return endQuiz();
+  current = rem[Math.floor(Math.random() * rem.length)];
 
   if (mode === "proto-to-port") {
     questionEl.textContent = `¿Qué puerto usa ${current.proto}?`;
   } else {
-    const unasked = current.ports.filter(p => !answeredPorts.has(p));
-    current.port = unasked[Math.floor(Math.random() * unasked.length)];
+    const un = current.ports.filter(p => !answeredPorts.has(p));
+    current.port = un[Math.floor(Math.random() * un.length)];
     questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
   }
 
-  if (flashMode) {
-    timeLeft = 20;
-    timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
-    startFlashTimer();
-  } else {
-    timerEl.textContent = "";
-  }
+  if (flashMode) startFlashTimer();
+  else timerEl.textContent = "";
 }
 
+// —– Comprueba la respuesta —–
 function checkAnswer(e){
   e.preventDefault();
-  // NO clearInterval aquí: mantenemos contador visible hasta saber si es correcto
+  // NO detenemos el timer aquí salvo que sea correcto
 
   const raw = answerIn.value.trim();
   if (!raw) {
@@ -129,9 +147,9 @@ function checkAnswer(e){
         p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim() === input
       );
 
-  // Si es correcto, detenemos el timer
+  // Si es correcto en Flash, detenemos el timer
   if (isCorrect && flashMode) {
-    clearInterval(flashTimer);
+    stopFlashTimer();
   }
 
   // Explicación
@@ -161,51 +179,37 @@ function checkAnswer(e){
   logHistory(raw, isCorrect);
 }
 
-function startFlashTimer(){
-  flashTimer = setInterval(() => {
-    timeLeft--;
-    timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
-    if (timeLeft <= 0) {
-      clearInterval(flashTimer);
-      alert('⏱️ ¡Tiempo agotado! Finalizando test…');
-      endQuiz();
-    }
-  }, 1000);
-}
-
+// —– Tema y Flash toggle —–
 function toggleTheme(){
-  const root = document.documentElement;
-  const bg   = getComputedStyle(root).getPropertyValue("--bg").trim();
+  const root = document.documentElement, bg = getComputedStyle(root).getPropertyValue("--bg").trim();
   if (bg === "#000") {
-    root.style.setProperty("--bg",   "#fff");
+    root.style.setProperty("--bg", "#fff");
     root.style.setProperty("--text", "#000");
-    root.style.setProperty("--card-bg","rgba(255,255,255,0.85)");
-    root.style.setProperty("--border","#000");
+    root.style.setProperty("--card-bg", "rgba(255,255,255,0.85)");
+    root.style.setProperty("--border", "#000");
   } else {
-    root.style.setProperty("--bg",   "#000");
+    root.style.setProperty("--bg", "#000");
     root.style.setProperty("--text", "#0f0");
-    root.style.setProperty("--card-bg","rgba(0,0,0,0.85)");
-    root.style.setProperty("--border","#0f0");
+    root.style.setProperty("--card-bg", "rgba(0,0,0,0.85)");
+    root.style.setProperty("--border", "#0f0");
   }
 }
 
 function toggleFlashMode(){
   flashMode = !flashMode;
   if (flashMode) {
-    timeLeft = 20;
-    timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
     startFlashTimer();
     alert("⚡ Modo Flash activado (20s por pregunta)");
   } else {
-    clearInterval(flashTimer);
+    stopFlashTimer();
     timerEl.textContent = "";
     alert("⚡ Modo Flash desactivado");
   }
 }
 
+// —– Utilidades —–
 function updateScore(){
-  const total = correct + wrong;
-  const pct   = total ? Math.round((correct/total)*100) : 0;
+  const total = correct + wrong, pct = total ? Math.round((correct/total)*100) : 0;
   scoreEl.innerHTML = `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
 }
 
@@ -217,11 +221,10 @@ function logHistory(input, ok){
 }
 
 function endQuiz(){
-  clearInterval(flashTimer);
+  stopFlashTimer();
   quizCard.style.display    = "none";
   summaryCard.style.display = "block";
-  const total = correct + wrong;
-  const pct   = total ? Math.round((correct/total)*100) : 0;
+  const total = correct + wrong, pct = total ? Math.round((correct/total)*100) : 0;
   summaryStats.innerHTML = `
     <p>✅ Aciertos: <strong>${correct}</strong></p>
     <p>❌ Errores: <strong>${wrong}</strong></p>
