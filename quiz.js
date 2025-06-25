@@ -64,16 +64,17 @@ let mode = "proto-to-port";
 let flashMode = false, flashTimer = null, timeLeft = 20;
 let lastRawInput = null;
 
-// —– Funciones Flash —–
+// —– Funciones de Modo Flash —–
 function startFlashTimer(){
-  stopFlashTimer();
+  // aseguramos limpiar antes
+  if (flashTimer) clearInterval(flashTimer);
   timeLeft = 20;
   timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
   flashTimer = setInterval(() => {
     timeLeft--;
     timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
     if (timeLeft <= 0) {
-      stopFlashTimer();
+      clearInterval(flashTimer);
       alert('⏱️ ¡Tiempo agotado! Finalizando test…');
       endQuiz();
     }
@@ -81,9 +82,9 @@ function startFlashTimer(){
 }
 
 function stopFlashTimer(){
-  clearInterval(flashTimer);
+  if (flashTimer) clearInterval(flashTimer);
   flashTimer = null;
-  // mantenemos timerEl.textContent para mostrar el tiempo alcanzado
+  // no tocamos timerEl.textContent para dejar el tiempo congelado
 }
 
 // —– Inicio y navegación —–
@@ -118,14 +119,16 @@ function nextQuestion(){
     questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
   }
 
-  if (flashMode) startFlashTimer();
-  else timerEl.textContent = "";
+  if (flashMode) {
+    startFlashTimer();
+  } else {
+    timerEl.textContent = "";
+  }
 }
 
-// —– Comprueba la respuesta —–
+// —– Comprobación de respuesta —–
 function checkAnswer(e){
   e.preventDefault();
-  // NO detenemos el timer aquí salvo que sea correcto
 
   const raw = answerIn.value.trim();
   if (!raw) {
@@ -147,12 +150,12 @@ function checkAnswer(e){
         p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim() === input
       );
 
-  // Si es correcto en Flash, detenemos el timer
+  // **Aquí detenemos el timer si y sólo si aciertas en Flash**
   if (isCorrect && flashMode) {
     stopFlashTimer();
   }
 
-  // Explicación
+  // Mostrar explicación
   const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
   expEl.innerHTML = `
     🔢 <strong>Puerto(s): ${current.ports.join(", ")}</strong><br>
@@ -181,17 +184,18 @@ function checkAnswer(e){
 
 // —– Tema y Flash toggle —–
 function toggleTheme(){
-  const root = document.documentElement, bg = getComputedStyle(root).getPropertyValue("--bg").trim();
+  const root = document.documentElement;
+  const bg   = getComputedStyle(root).getPropertyValue("--bg").trim();
   if (bg === "#000") {
-    root.style.setProperty("--bg", "#fff");
-    root.style.setProperty("--text", "#000");
-    root.style.setProperty("--card-bg", "rgba(255,255,255,0.85)");
-    root.style.setProperty("--border", "#000");
+    root.style.setProperty("--bg","#fff");
+    root.style.setProperty("--text","#000");
+    root.style.setProperty("--card-bg","rgba(255,255,255,0.85)");
+    root.style.setProperty("--border","#000");
   } else {
-    root.style.setProperty("--bg", "#000");
-    root.style.setProperty("--text", "#0f0");
-    root.style.setProperty("--card-bg", "rgba(0,0,0,0.85)");
-    root.style.setProperty("--border", "#0f0");
+    root.style.setProperty("--bg","#000");
+    root.style.setProperty("--text","#0f0");
+    root.style.setProperty("--card-bg","rgba(0,0,0,0.85)");
+    root.style.setProperty("--border","#0f0");
   }
 }
 
@@ -209,7 +213,8 @@ function toggleFlashMode(){
 
 // —– Utilidades —–
 function updateScore(){
-  const total = correct + wrong, pct = total ? Math.round((correct/total)*100) : 0;
+  const total = correct + wrong;
+  const pct   = total ? Math.round((correct/total)*100) : 0;
   scoreEl.innerHTML = `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
 }
 
@@ -224,7 +229,8 @@ function endQuiz(){
   stopFlashTimer();
   quizCard.style.display    = "none";
   summaryCard.style.display = "block";
-  const total = correct + wrong, pct = total ? Math.round((correct/total)*100) : 0;
+  const total = correct + wrong;
+  const pct   = total ? Math.round((correct/total)*100) : 0;
   summaryStats.innerHTML = `
     <p>✅ Aciertos: <strong>${correct}</strong></p>
     <p>❌ Errores: <strong>${wrong}</strong></p>
@@ -239,7 +245,7 @@ function endQuiz(){
   `;
 }
 
-// —– Listeners —–
+// —– Event Listeners —–
 startBtn.addEventListener("click", startQuiz);
 themeBtn.addEventListener("click", toggleTheme);
 flashBtn.addEventListener("click", toggleFlashMode);
