@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Quiz Puertos – Security+</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <!-- Enlaza tu style.css con los ajustes de .wrapper y .card más anchos -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,9 +18,9 @@
         <option value="proto-to-port">¿Qué puerto usa [protocolo]?</option>
         <option value="port-to-proto">¿Qué protocolo usa el puerto [número]?</option>
       </select><br>
-      <button type="button" onclick="startQuiz()">Comenzar</button>
-      <button type="button" onclick="toggleTheme()">🌙/🌞</button>
-      <button type="button" onclick="toggleFlashMode()">⚡ Modo Flash (20s)</button>
+      <button type="button" id="startBtn">Comenzar</button>
+      <button type="button" id="themeBtn">🌙/🌞</button>
+      <button type="button" id="flashBtn">⚡ Modo Flash (20s)</button>
     </div>
 
     <!-- Pantalla del quiz -->
@@ -30,7 +29,7 @@
       <input type="text" id="answerInput" placeholder="Tu respuesta..." /><br>
       <button type="button" id="checkBtn">Comprobar</button>
       <button type="button" id="nextBtn" disabled>Siguiente</button>
-      <button type="button" onclick="endQuiz()">Finalizar Quiz</button>
+      <button type="button" id="endBtn">Finalizar Quiz</button>
       <div class="timer" id="timer"></div>
       <div class="result" id="result"></div>
       <div class="explanation" id="explanation"></div>
@@ -45,10 +44,20 @@
       <h2>📘 Resumen del Quiz</h2>
       <div id="summaryStats"></div>
       <div id="summaryFailures"></div>
-      <button type="button" onclick="location.reload()">🔄 Reiniciar</button>
+      <button type="button" id="restartBtn">🔄 Reiniciar</button>
     </div>
   </div>
 
   <script src="quiz.js"></script>
+  <script>
+    // Enlazar botones de inicio, tema, flash y reiniciar
+    window.onload = function() {
+      document.getElementById('startBtn').addEventListener('click', startQuiz);
+      document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+      document.getElementById('flashBtn').addEventListener('click', toggleFlashMode);
+      document.getElementById('endBtn').addEventListener('click', endQuiz);
+      document.getElementById('restartBtn').addEventListener('click', () => location.reload());
+    };
+  </script>
 </body>
 </html>
