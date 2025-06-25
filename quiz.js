@@ -1,7 +1,5 @@
-// quiz.js
-
 document.addEventListener("DOMContentLoaded", () => {
-  // Array de datos
+  // --- Datos ---
   const data = [
     { proto: "FTP", ports: ["21", "20"], note: "File Transfer Protocol (FTP)" },
     { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
@@ -36,21 +34,19 @@ document.addEventListener("DOMContentLoaded", () => {
     { proto: "RADIUS (UDP)", ports: ["1812", "1813"], note: "RADIUS estándar (UDP)" },
     { proto: "Syslog TLS", ports: ["6514"], note: "Syslog seguro con TLS (TCP)" },
     { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
+
   ];
 
-  // Estado
+  // --- Estado ---
   let current = {};
-  let correct = 0;
-  let wrong = 0;
+  let correct = 0, wrong = 0;
   let answeredPorts = new Set();
   let mode = "proto-to-port";
   let history = [];
-  let flashMode = false;
-  let flashTimer = null;
-  let timeLeft = 20;
+  let flashMode = false, flashTimer = null, timeLeft = 20;
   let lastRawInput = null;
 
-  // Elementos del DOM
+  // --- Referencias DOM ---
   const startBtn   = document.getElementById("startBtn");
   const themeBtn   = document.getElementById("themeBtn");
   const flashBtn   = document.getElementById("flashBtn");
@@ -67,8 +63,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const historyEl  = document.getElementById("history");
   const summaryStats    = document.getElementById("summaryStats");
   const summaryFailures = document.getElementById("summaryFailures");
+  const startCard   = document.getElementById("startCard");
+  const quizCard    = document.getElementById("quizCard");
+  const summaryCard = document.getElementById("summaryCard");
 
-  // Enlazar eventos
+  // --- Eventos ---
   startBtn.addEventListener("click", startQuiz);
   themeBtn.addEventListener("click", toggleTheme);
   flashBtn.addEventListener("click", toggleFlashMode);
@@ -81,14 +80,13 @@ document.addEventListener("DOMContentLoaded", () => {
     resultEl.textContent = "";
   });
 
-  // Funciones del quiz:
+  // --- Lógica del Quiz ---
   function startQuiz() {
     mode = document.getElementById("mode").value;
-    document.getElementById("startCard").style.display   = "none";
-    document.getElementById("summaryCard").style.display = "none";
-    document.getElementById("quizCard").style.display    = "block";
-    correct = 0;
-    wrong   = 0;
+    startCard.style.display   = "none";
+    summaryCard.style.display = "none";
+    quizCard.style.display    = "block";
+    correct = 0; wrong = 0;
     answeredPorts.clear();
     history = [];
     updateScore();
@@ -98,14 +96,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function nextQuestion() {
     stopFlashTimer();
     lastRawInput = null;
-    resultEl.textContent      = "";
-    expEl.textContent         = "";
-    nextBtn.disabled          = true;
-    timerEl.textContent       = "";
+    resultEl.textContent = "";
+    expEl.textContent    = "";
+    nextBtn.disabled     = true;
+    timerEl.textContent  = "";
+
     const remaining = data.filter(item =>
-      item.ports.some(port => !answeredPorts.has(port))
+      item.ports.some(p => !answeredPorts.has(p))
     );
     if (!remaining.length) return endQuiz();
+
     current = remaining[Math.floor(Math.random() * remaining.length)];
     if (mode === "proto-to-port") {
       questionEl.textContent = `¿Qué puerto usa ${current.proto}?`;
@@ -114,13 +114,15 @@ document.addEventListener("DOMContentLoaded", () => {
       current.port = unasked[Math.floor(Math.random() * unasked.length)];
       questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
     }
+
     answerIn.value = "";
     if (flashMode) startFlashTimer();
   }
 
-  function checkAnswer(event) {
-    event.preventDefault();
+  function checkAnswer(e) {
+    e.preventDefault();
     stopFlashTimer();
+
     const raw = answerIn.value.trim();
     if (!raw) {
       resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
@@ -133,17 +135,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     lastRawInput = raw;
+
     const input = raw.toLowerCase().replace(/[^a-z0-9]/gi, "");
     let isCorrect = false;
     if (mode === "proto-to-port") {
       isCorrect = current.ports.includes(input);
     } else {
-      const opts = current.proto
-        .split("/")
-        .map(p => p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim());
+      const opts = current.proto.split("/").map(p =>
+        p.replace(/[^a-z0-9]/gi,"").toLowerCase().trim()
+      );
       isCorrect = opts.includes(input);
     }
-    const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
+
+    const portLink = mode==="proto-to-port" ? current.ports[0] : current.port;
     expEl.innerHTML = `
       🔢 <strong>Puerto(s): ${current.ports.join(", ")}</strong><br>
       🧠 <strong>${current.proto}</strong>: ${current.note}<br>
@@ -151,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Ver en CBT Nuggets (puerto ${portLink})
       </a>
     `;
+
     if (isCorrect) {
       resultEl.textContent = "✅ ¡Correcto!";
       resultEl.className   = "result correct";
@@ -161,6 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resultEl.className   = "result incorrect";
       wrong++;
     }
+
     nextBtn.disabled = false;
     updateScore();
     logHistory(raw, isCorrect);
@@ -175,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
       timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
       if (timeLeft <= 0) {
         stopFlashTimer();
-        alert('⏱️ ¡Tiempo agotado! El test ha finalizado.');
+        alert('⏱️ ¡Tiempo agotado! Finalizando test...');
         endQuiz();
       }
     }, 1000);
@@ -186,34 +192,60 @@ document.addEventListener("DOMContentLoaded", () => {
     timerEl.textContent = "";
   }
 
+  function toggleTheme() {
+    const root = document.documentElement;
+    const bg   = getComputedStyle(root).getPropertyValue('--bg').trim();
+    if (bg === '#000') {
+      root.style.setProperty('--bg',   '#fff');
+      root.style.setProperty('--text', '#000');
+      root.style.setProperty('--card-bg','rgba(255,255,255,0.85)');
+      root.style.setProperty('--border','#000');
+    } else {
+      root.style.setProperty('--bg',   '#000');
+      root.style.setProperty('--text', '#0f0');
+      root.style.setProperty('--card-bg','rgba(0,0,0,0.85)');
+      root.style.setProperty('--border','#0f0');
+    }
+  }
+
+  function toggleFlashMode() {
+    flashMode = !flashMode;
+    if (!flashMode) stopFlashTimer();
+    alert(
+      flashMode
+        ? '⚡ Modo Flash activado (20s por pregunta)'
+        : '⚡ Modo Flash desactivado'
+    );
+  }
+
   function updateScore() {
     const total = correct + wrong;
-    const pct   = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct/total)*100) : 0;
     scoreEl.innerHTML = `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
   }
 
   function logHistory(input, ok) {
     const q = questionEl.textContent;
-    history.push(`${q} ➜ Respuesta: ${input || "(vacío)"} | ${ok ? "✅" : "❌"}`);
-    const list = history.slice(-10).map(h => `<li>${h}</li>`).join("");
-    historyEl.innerHTML = `<strong>🧾 Últimas respuestas:</strong><ul>${list}</ul>`;
+    history.push(`${q} ➜ Respuesta: ${input||"(vacío)"} | ${ok?"✅":"❌"}`);
+    historyEl.innerHTML = `<strong>🧾 Últimas respuestas:</strong><ul>${
+      history.slice(-10).map(h=>`<li>${h}</li>`).join("")
+    }</ul>`;
   }
 
   function endQuiz() {
     stopFlashTimer();
-    document.getElementById("quizCard").style.display    = "none";
-    document.getElementById("summaryCard").style.display = "block";
+    quizCard.style.display    = "none";
+    summaryCard.style.display = "block";
     const total = correct + wrong;
-    const pct   = total ? Math.round((correct / total) * 100) : 0;
+    const pct   = total ? Math.round((correct/total)*100) : 0;
     summaryStats.innerHTML = `
       <p>✅ Aciertos: <strong>${correct}</strong></p>
       <p>❌ Errores: <strong>${wrong}</strong></p>
       <p>📊 Precisión: <strong>${pct}%</strong></p>
     `;
-    const fails = history.filter(h => h.includes("❌")).map(h => `<li>${h}</li>`).join("");
     summaryFailures.innerHTML = `
       <h3>❌ Preguntas fallidas:</h3>
-      <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
+      <ul>${history.filter(h=>h.includes("❌")).map(h=>`<li>${h}</li>`).join("") || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
     `;
   }
 });
