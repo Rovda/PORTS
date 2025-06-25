@@ -1,0 +1,109 @@
+:root {
+  --bg: #121212;
+  --card: #1e1e1e;
+  --text: #ffffff;
+  --accent: #00b894;
+  --error: #ff7675;
+  --success: #00e676;
+  --link: #81ecec;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', sans-serif;
+  padding: 2rem;
+  text-align: center;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+}
+
+input, select {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  margin: 1rem 0;
+  width: 80%;
+  max-width: 300px;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 0.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+.question {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.result {
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.correct {
+  color: var(--success);
+}
+
+.incorrect {
+  color: var(--error);
+}
+
+.explanation {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.timer {
+  margin-top: 0.5rem;
+  color: #ffd54f;
+}
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.score, .history {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  text-align: left;
+  background: #2c3e50;
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 600px) {
+  .card, .score, .history {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  h1 {
+    font-size: 1.2rem;
+  }
+}
