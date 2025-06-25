@@ -92,7 +92,6 @@ window.onload = function () {
     }
 
     if (alreadyAnswered) return;
-    alreadyAnswered = true;
 
     const input = rawInput.toLowerCase();
     let isCorrect = false;
@@ -100,9 +99,11 @@ window.onload = function () {
     if (mode === "proto-to-port") {
       isCorrect = current.ports.includes(input);
     } else {
-      const normalizedInput = input.replace(/[^a-z0-9]/gi, "").toLowerCase();
-      const expected = current.proto.replace(/[^a-z0-9]/gi, "").toLowerCase();
-      isCorrect = normalizedInput === expected;
+      const options = current.proto.split("/").map(p =>
+        p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim()
+      );
+      const userAnswer = input.replace(/[^a-z0-9]/gi, "").toLowerCase();
+      isCorrect = options.includes(userAnswer);
     }
 
     const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
@@ -121,6 +122,7 @@ window.onload = function () {
       document.getElementById("nextBtn").disabled = false;
       current.ports.forEach(p => answeredPorts.add(p));
       correct++;
+      alreadyAnswered = true; // ✅ Solo ahora marcamos como respondida
       stopFlashTimer();
     } else {
       result.textContent = "❌ Incorrecto. Intenta de nuevo.";
