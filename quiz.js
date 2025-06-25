@@ -66,7 +66,6 @@ let lastRawInput = null;
 
 // —– Funciones de Modo Flash —–
 function startFlashTimer(){
-  // aseguramos limpiar antes
   if (flashTimer) clearInterval(flashTimer);
   timeLeft = 20;
   timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
@@ -84,7 +83,7 @@ function startFlashTimer(){
 function stopFlashTimer(){
   if (flashTimer) clearInterval(flashTimer);
   flashTimer = null;
-  // no tocamos timerEl.textContent para dejar el tiempo congelado
+  // dejamos el número para que permanezca visible
 }
 
 // —– Inicio y navegación —–
@@ -107,23 +106,20 @@ function nextQuestion(){
   nextBtn.disabled     = true;
   answerIn.value       = "";
 
-  const rem = data.filter(d => d.ports.some(p => !answeredPorts.has(p)));
+  const rem = data.filter(d=> d.ports.some(p=> !answeredPorts.has(p)));
   if (!rem.length) return endQuiz();
-  current = rem[Math.floor(Math.random() * rem.length)];
+  current = rem[Math.floor(Math.random()*rem.length)];
 
-  if (mode === "proto-to-port") {
+  if (mode==="proto-to-port") {
     questionEl.textContent = `¿Qué puerto usa ${current.proto}?`;
   } else {
-    const un = current.ports.filter(p => !answeredPorts.has(p));
-    current.port = un[Math.floor(Math.random() * un.length)];
+    const un = current.ports.filter(p=> !answeredPorts.has(p));
+    current.port = un[Math.floor(Math.random()*un.length)];
     questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
   }
 
-  if (flashMode) {
-    startFlashTimer();
-  } else {
-    timerEl.textContent = "";
-  }
+  if (flashMode) startFlashTimer();
+  else timerEl.textContent = "";
 }
 
 // —– Comprobación de respuesta —–
@@ -136,27 +132,27 @@ function checkAnswer(e){
     resultEl.className   = "result incorrect";
     return;
   }
-  if (raw === lastRawInput) {
+  if (raw===lastRawInput) {
     resultEl.textContent = "✏️ Cambia tu respuesta para volver a comprobar.";
     resultEl.className   = "result incorrect";
     return;
   }
   lastRawInput = raw;
 
-  const input = raw.toLowerCase().replace(/[^a-z0-9]/gi, "");
-  const isCorrect = mode === "proto-to-port"
+  const input = raw.toLowerCase().replace(/[^a-z0-9]/gi,"");
+  const isCorrect = mode==="proto-to-port"
     ? current.ports.includes(input)
-    : current.proto.split("/").some(p =>
-        p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim() === input
+    : current.proto.split("/").some(p=>
+        p.replace(/[^a-z0-9]/gi,"").toLowerCase().trim()===input
       );
 
-  // **Aquí detenemos el timer si y sólo si aciertas en Flash**
+  // **Si aciertas en Flash, detenemos el cronómetro**
   if (isCorrect && flashMode) {
     stopFlashTimer();
   }
 
-  // Mostrar explicación
-  const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
+  // Explicación
+  const portLink = mode==="proto-to-port"? current.ports[0]:current.port;
   expEl.innerHTML = `
     🔢 <strong>Puerto(s): ${current.ports.join(", ")}</strong><br>
     🧠 <strong>${current.proto}</strong>: ${current.note}<br>
@@ -169,7 +165,7 @@ function checkAnswer(e){
   if (isCorrect) {
     resultEl.textContent = "✅ ¡Correcto!";
     resultEl.className   = "result correct";
-    current.ports.forEach(p => answeredPorts.add(p));
+    current.ports.forEach(p=> answeredPorts.add(p));
     correct++;
   } else {
     resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
@@ -179,14 +175,13 @@ function checkAnswer(e){
 
   nextBtn.disabled = false;
   updateScore();
-  logHistory(raw, isCorrect);
+  logHistory(raw,isCorrect);
 }
 
 // —– Tema y Flash toggle —–
 function toggleTheme(){
-  const root = document.documentElement;
-  const bg   = getComputedStyle(root).getPropertyValue("--bg").trim();
-  if (bg === "#000") {
+  const root = document.documentElement, bg = getComputedStyle(root).getPropertyValue("--bg").trim();
+  if (bg==="#000") {
     root.style.setProperty("--bg","#fff");
     root.style.setProperty("--text","#000");
     root.style.setProperty("--card-bg","rgba(255,255,255,0.85)");
@@ -213,47 +208,45 @@ function toggleFlashMode(){
 
 // —– Utilidades —–
 function updateScore(){
-  const total = correct + wrong;
-  const pct   = total ? Math.round((correct/total)*100) : 0;
-  scoreEl.innerHTML = `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
+  const total = correct+wrong, pct = total?Math.round((correct/total)*100):0;
+  scoreEl.innerHTML=`✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
 }
 
-function logHistory(input, ok){
+function logHistory(input,ok){
   history.push(`${questionEl.textContent} ➜ ${input||"(vacío)"} | ${ok?"✅":"❌"}`);
-  historyEl.innerHTML = `<strong>🧾 Últimas respuestas:</strong><ul>${
+  historyEl.innerHTML=`<strong>🧾 Últimas respuestas:</strong><ul>${
     history.slice(-10).map(h=>`<li>${h}</li>`).join("")
   }</ul>`;
 }
 
 function endQuiz(){
   stopFlashTimer();
-  quizCard.style.display    = "none";
-  summaryCard.style.display = "block";
-  const total = correct + wrong;
-  const pct   = total ? Math.round((correct/total)*100) : 0;
-  summaryStats.innerHTML = `
+  quizCard.style.display="none";
+  summaryCard.style.display="block";
+  const total=correct+wrong, pct=total?Math.round((correct/total)*100):0;
+  summaryStats.innerHTML=`
     <p>✅ Aciertos: <strong>${correct}</strong></p>
     <p>❌ Errores: <strong>${wrong}</strong></p>
     <p>📊 Precisión: <strong>${pct}%</strong></p>
   `;
-  summaryFailures.innerHTML = `
+  summaryFailures.innerHTML=`
     <h3>❌ Preguntas fallidas:</h3>
     <ul>${
-      history.filter(h=>h.includes("❌")).map(h=>`<li>${h}</li>`).join("") ||
+      history.filter(h=>h.includes("❌")).map(h=>`<li>${h}</li>`).join("")||
       "<li>🎉 ¡No fallaste ninguna!</li>"
     }</ul>
   `;
 }
 
-// —– Event Listeners —–
+// —– Listeners —–
 startBtn.addEventListener("click", startQuiz);
 themeBtn.addEventListener("click", toggleTheme);
 flashBtn.addEventListener("click", toggleFlashMode);
 checkBtn.addEventListener("click", checkAnswer);
 nextBtn.addEventListener("click", nextQuestion);
 endBtn.addEventListener("click", endQuiz);
-restartBtn.addEventListener("click", () => location.reload());
-answerIn.addEventListener("input", () => {
+restartBtn.addEventListener("click", ()=>location.reload());
+answerIn.addEventListener("input", ()=>{
   lastRawInput = null;
   resultEl.textContent = "";
 });
