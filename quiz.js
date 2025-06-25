@@ -1,5 +1,7 @@
-(function() {
-  // Datos iniciales
+// quiz.js
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Array de datos
   const data = [
     { proto: "FTP", ports: ["21", "20"], note: "File Transfer Protocol (FTP)" },
     { proto: "SSH", ports: ["22"], note: "Secure Shell (acceso remoto cifrado)" },
@@ -36,7 +38,7 @@
     { proto: "RDP", ports: ["3389"], note: "Remote Desktop Protocol (TCP)" }
   ];
 
-  // Estado interno
+  // Estado
   let current = {};
   let correct = 0;
   let wrong = 0;
@@ -48,7 +50,7 @@
   let timeLeft = 20;
   let lastRawInput = null;
 
-  // Referencias a elementos
+  // Elementos del DOM
   const startBtn   = document.getElementById("startBtn");
   const themeBtn   = document.getElementById("themeBtn");
   const flashBtn   = document.getElementById("flashBtn");
@@ -66,28 +68,20 @@
   const summaryStats    = document.getElementById("summaryStats");
   const summaryFailures = document.getElementById("summaryFailures");
 
-  // Funciones expuestas globalmente
-  window.startQuiz       = startQuiz;
-  window.toggleTheme     = toggleTheme;
-  window.toggleFlashMode = toggleFlashMode;
-  window.endQuiz         = endQuiz;
-
-  // Bind eventos una vez cargado el DOM
-  document.addEventListener("DOMContentLoaded", () => {
-    startBtn.addEventListener("click", startQuiz);
-    themeBtn.addEventListener("click", toggleTheme);
-    flashBtn.addEventListener("click", toggleFlashMode);
-    checkBtn.addEventListener("click", checkAnswer);
-    nextBtn.addEventListener("click", nextQuestion);
-    endBtn.addEventListener("click", endQuiz);
-    restartBtn.addEventListener("click", () => location.reload());
-    answerIn.addEventListener("input", () => {
-      lastRawInput = null;
-      resultEl.textContent = "";
-    });
-    updateScore();
+  // Enlazar eventos
+  startBtn.addEventListener("click", startQuiz);
+  themeBtn.addEventListener("click", toggleTheme);
+  flashBtn.addEventListener("click", toggleFlashMode);
+  checkBtn.addEventListener("click", checkAnswer);
+  nextBtn.addEventListener("click", nextQuestion);
+  endBtn.addEventListener("click", endQuiz);
+  restartBtn.addEventListener("click", () => location.reload());
+  answerIn.addEventListener("input", () => {
+    lastRawInput = null;
+    resultEl.textContent = "";
   });
 
+  // Funciones del quiz:
   function startQuiz() {
     mode = document.getElementById("mode").value;
     document.getElementById("startCard").style.display   = "none";
@@ -108,12 +102,10 @@
     expEl.textContent         = "";
     nextBtn.disabled          = true;
     timerEl.textContent       = "";
-
     const remaining = data.filter(item =>
       item.ports.some(port => !answeredPorts.has(port))
     );
     if (!remaining.length) return endQuiz();
-
     current = remaining[Math.floor(Math.random() * remaining.length)];
     if (mode === "proto-to-port") {
       questionEl.textContent = `¿Qué puerto usa ${current.proto}?`;
@@ -122,7 +114,6 @@
       current.port = unasked[Math.floor(Math.random() * unasked.length)];
       questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
     }
-
     answerIn.value = "";
     if (flashMode) startFlashTimer();
   }
@@ -130,7 +121,6 @@
   function checkAnswer(event) {
     event.preventDefault();
     stopFlashTimer();
-
     const raw = answerIn.value.trim();
     if (!raw) {
       resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
@@ -143,7 +133,6 @@
       return;
     }
     lastRawInput = raw;
-
     const input = raw.toLowerCase().replace(/[^a-z0-9]/gi, "");
     let isCorrect = false;
     if (mode === "proto-to-port") {
@@ -154,7 +143,6 @@
         .map(p => p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim());
       isCorrect = opts.includes(input);
     }
-
     const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
     expEl.innerHTML = `
       🔢 <strong>Puerto(s): ${current.ports.join(", ")}</strong><br>
@@ -163,7 +151,6 @@
         Ver en CBT Nuggets (puerto ${portLink})
       </a>
     `;
-
     if (isCorrect) {
       resultEl.textContent = "✅ ¡Correcto!";
       resultEl.className   = "result correct";
@@ -174,7 +161,6 @@
       resultEl.className   = "result incorrect";
       wrong++;
     }
-
     nextBtn.disabled = false;
     updateScore();
     logHistory(raw, isCorrect);
@@ -215,8 +201,8 @@
 
   function endQuiz() {
     stopFlashTimer();
-    quizCard.style.display    = "none";
-    summaryCard.style.display = "block";
+    document.getElementById("quizCard").style.display    = "none";
+    document.getElementById("summaryCard").style.display = "block";
     const total = correct + wrong;
     const pct   = total ? Math.round((correct / total) * 100) : 0;
     summaryStats.innerHTML = `
@@ -230,4 +216,4 @@
       <ul>${fails || '<li>🎉 ¡No fallaste ninguna!</li>'}</ul>
     `;
   }
-})();
+});
