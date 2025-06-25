@@ -99,9 +99,9 @@ window.onload = function () {
     if (mode === "proto-to-port") {
       isCorrect = current.ports.includes(input);
     } else {
-      const options = current.proto.split("/").map(p =>
-        p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim()
-      );
+      const options = current.proto
+        .split("/")
+        .map(p => p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim());
       const userAnswer = input.replace(/[^a-z0-9]/gi, "").toLowerCase();
       isCorrect = options.includes(userAnswer);
     }
@@ -122,7 +122,7 @@ window.onload = function () {
       document.getElementById("nextBtn").disabled = false;
       current.ports.forEach(p => answeredPorts.add(p));
       correct++;
-      alreadyAnswered = true; // ✅ Solo ahora marcamos como respondida
+      alreadyAnswered = true;
       stopFlashTimer();
     } else {
       result.textContent = "❌ Incorrecto. Intenta de nuevo.";
