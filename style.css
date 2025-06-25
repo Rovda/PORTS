@@ -11,7 +11,7 @@ body.quiz-over #history {
   display: block;
 }
 
-/* resto de tu CSS existente */
+/* —– Resto de tu CSS existente —– */
 :root {
   --bg: #000;
   --text: #0f0;
@@ -64,11 +64,11 @@ h1 {
   animation:blink 1s step-end infinite;
 }
 @keyframes blink {0%,100%{opacity:1;}50%{opacity:0;}}
-input,select,button {
+input, select, button {
   font-family:inherit;
   font-size:1rem;
 }
-input,select {
+input, select {
   background:var(--bg);
   color:var(--text);
   border:1px solid var(--border);
@@ -86,17 +86,17 @@ button {
   text-shadow:0 0 4px var(--text);
   transition:background .2s,box-shadow .2s;
 }
-button:hover,button:focus {
+button:hover, button:focus {
   background:rgba(0,255,0,0.1);
   box-shadow:0 0 8px var(--text);
 }
-.score,.history,.timer,.result,.explanation {
+.score, .history, .timer, .result, .explanation {
   width:90%;
   max-width:800px;
   margin:1rem 0;
   text-align:left;
 }
-.score,.history {
+.score, .history {
   background:var(--card-bg);
   border:1px solid var(--border);
   box-shadow:0 0 8px var(--text);
@@ -105,9 +105,9 @@ button:hover,button:focus {
 }
 @media(max-width:600px) {
   .wrapper {
-    height: auto;
-    justify-content: flex-start;
-    align-items: stretch;
+    height:auto;
+    justify-content:flex-start;
+    align-items:stretch;
     padding:20px 10px;
   }
   .card {
@@ -116,7 +116,7 @@ button:hover,button:focus {
   h1 {
     font-size:2rem;
   }
-  button,input,select {
+  button, input, select {
     width:100%;
     max-width:300px;
   }
