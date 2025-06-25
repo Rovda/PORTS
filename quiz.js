@@ -47,6 +47,7 @@ window.onload = function () {
       document.getElementById("answerInput").style.display = "none";
       document.getElementById("checkBtn").style.display = "none";
       document.getElementById("nextBtn").style.display = "none";
+      document.getElementById("endBtn").style.display = "none";
       stopFlashTimer();
       return;
     }
@@ -98,10 +99,12 @@ window.onload = function () {
     }
 
     const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
+    const portsList = current.ports.join(", ");
     explanation.innerHTML = `
+      🔢 <strong>Puerto(s): ${portsList}</strong><br>
       🧠 <strong>${current.proto}</strong>: ${current.note}<br>
       🔗 <a href="https://www.cbtnuggets.com/common-ports/what-is-port-${portLink}" target="_blank">
-      Ver en CBT Nuggets (puerto ${portLink})
+        Ver en CBT Nuggets (puerto ${portLink})
       </a>
     `;
 
@@ -165,10 +168,17 @@ window.onload = function () {
     document.getElementById("timer").textContent = "";
   }
 
-  // Expose globally (required for inline HTML onclick)
+  function endQuiz() {
+    stopFlashTimer();
+    document.getElementById("quizCard").style.display = "none";
+    document.getElementById("score").innerHTML += `<br>📘 Quiz finalizado. ¡Buen trabajo!`;
+  }
+
+  // Exponer globalmente
   window.startQuiz = startQuiz;
   window.checkAnswer = checkAnswer;
   window.nextQuestion = nextQuestion;
   window.toggleTheme = toggleTheme;
   window.toggleFlashMode = toggleFlashMode;
+  window.endQuiz = endQuiz;
 };
