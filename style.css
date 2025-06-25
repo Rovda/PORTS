@@ -1,6 +1,14 @@
-/* style.css – Estilo Hacker Terminal */
+/* style.css */
 
-/* 1) Reset y tipografía */
+/* 1) Variables de tema */
+:root {
+  --bg: #000;
+  --text: #0f0;
+  --card-bg: rgba(0,0,0,0.85);
+  --border: #0f0;
+}
+
+/* 2) Reset y fondo “terminal” */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,13 +16,12 @@
 }
 html, body {
   height: 100%;
-  background: #000;                         /* Fondo negro */
-  color: #0f0;                              /* Texto verde neón */
+  background: var(--bg);
+  color: var(--text);
   font-family: 'Courier New', Courier, monospace;
   overflow-x: hidden;
 }
-
-/* 2) Patrón de puntos sutil (como scanlines) */
+/* Patrón de scanlines ligero */
 body {
   background-image:
     radial-gradient(rgba(0,255,0,0.02) 1px, transparent 1px);
@@ -27,22 +34,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;     /* 100% de la ventana */
+  height: 100vh;
   padding: 20px;
 }
 
-/* 4) Encabezado con glow */
+/* 4) Título con glow */
 h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  text-shadow: 0 0 8px #0f0;
+  text-shadow: 0 0 8px var(--text);
 }
 
 /* 5) Tarjetas estilo terminal */
 .card {
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid #0f0;
-  box-shadow: 0 0 12px #0f0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 12px var(--text);
   padding: 20px;
   width: 90%;
   max-width: 800px;
@@ -50,27 +57,28 @@ h1 {
   text-align: center;
 }
 
-/* 6) Efecto cursor parpadeante en la pregunta */
+/* 6) Pregunta con cursor parpadeante */
 .question {
   font-size: 1.2rem;
   position: relative;
   display: inline-block;
 }
-
-/* Pseudo-elemento “cursor” */
 .question::after {
   content: '|';
   position: absolute;
   right: -10px;
   animation: blink 1s step-end infinite;
 }
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
 
-/* 7) Inputs y selects “retro” */
-input,
-select {
+/* 7) Inputs & selects retro */
+input, select {
   background: #000;
-  color: #0f0;
-  border: 1px solid #0f0;
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 8px;
   margin: 10px 0;
   font-family: inherit;
@@ -81,60 +89,44 @@ select {
 /* 8) Botones estilo terminal */
 button {
   background: transparent;
-  color: #0f0;
-  border: 1px solid #0f0;
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 10px 20px;
   margin: 5px;
   font-family: inherit;
   font-size: 1rem;
   cursor: pointer;
-  text-shadow: 0 0 4px #0f0;
-  transition: background 0.2s, box-shadow 0.2s;
+  text-shadow: 0 0 4px var(--text);
+  transition: background .2s, box-shadow .2s;
+}
+button:hover, button:focus {
+  background: rgba(0,255,0,0.1);
+  box-shadow: 0 0 8px var(--text);
 }
 
-button:hover,
-button:focus {
-  background: rgba(0, 255, 0, 0.1);
-  box-shadow: 0 0 8px #0f0;
-}
-
-/* 9) Resultados y explicaciones */
-.timer,
-.result,
-.explanation,
-.score,
-.history {
-  margin-top: 1rem;
-  text-align: left;
+/* 9) Score, history, timer y explicación */
+.score, .history {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 8px var(--text);
   width: 90%;
   max-width: 800px;
-}
-
-/* Pestañas de score/history también estilo card */
-.score,
-.history {
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid #0f0;
-  box-shadow: 0 0 8px #0f0;
   padding: 10px;
   margin-bottom: 1rem;
-  font-size: 0.95rem;
+  text-align: left;
+  font-size: .95rem;
+}
+.timer, .result, .explanation {
+  margin-top: 1rem;
+  width: 90%;
+  max-width: 800px;
+  text-align: left;
 }
 
-/* 10) Animación parpadeo */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0; }
-}
-
-/* 11) Responsive */
+/* 10) Responsive */
 @media (max-width: 600px) {
-  .card {
-    padding: 15px;
-  }
-  h1 {
-    font-size: 2rem;
-  }
+  .card { padding: 15px; }
+  h1 { font-size: 2rem; }
   button, input, select {
     width: 100%;
     max-width: 300px;
