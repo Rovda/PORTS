@@ -1,38 +1,37 @@
-/* 1) Reset básico y fondo */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* style.css */
+
+/* 1) Asegúrate de que html y body ocupen el 100% del viewport */
 html, body {
   height: 100%;
+  margin: 0;
   background: #f0f2f5;
   font-family: Arial, sans-serif;
 }
 
-/* 2) Centrar y ocupar toda la pantalla */
+/* 2) Centrar TODO en pantalla completa */
 .wrapper {
-  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  height: 100vh;        /* fuerza 100% de alto */
   padding: 20px;
+  box-sizing: border-box;
 }
 
-/* 3) Tarjetas con ancho limitado y sombra */
+/* 3) Tarjetas más anchas */
 .card {
-  background: #ffffff;
+  background: #fff;
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 600px;
+  width: 90%;           /* ocupa 90% de ancho */
+  max-width: 800px;     /* hasta 800px */
   margin-bottom: 20px;
   text-align: center;
 }
 
-/* 4) Botones más vistosos */
+/* 4) Botones e inputs igual que antes */
 button {
   cursor: pointer;
   border: none;
@@ -44,7 +43,6 @@ button {
   font-size: 1rem;
 }
 
-/* 5) Input y selects un poco más grandes */
 input, select {
   font-size: 1rem;
   padding: 8px;
@@ -55,7 +53,7 @@ input, select {
   border-radius: 4px;
 }
 
-/* 6) Ajustes responsive */
+/* 5) Responsive para móviles */
 @media (max-width: 600px) {
   .card {
     padding: 20px;
