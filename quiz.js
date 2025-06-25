@@ -1,3 +1,5 @@
+// quiz.js
+
 // —– Referencias DOM —–
 const startBtn       = document.getElementById("startBtn");
 const themeBtn       = document.getElementById("themeBtn");
@@ -57,71 +59,83 @@ const data = [
 ];
 
 // —– Estado —–
-let current={}, correct=0, wrong=0;
-let answeredPorts=new Set(), history=[];
-let mode="proto-to-port", flashMode=false, flashTimer=null, timeLeft=20;
-let lastRawInput=null;
+let current = {};
+let correct = 0, wrong = 0;
+let answeredPorts = new Set(), history = [];
+let mode = "proto-to-port";
+let flashMode = false, flashTimer = null, timeLeft = 20;
+let lastRawInput = null;
 
-// —– Funciones —–
+// —– Inicia el quiz —–
 function startQuiz(){
   mode = document.getElementById("mode").value;
   startCard.style.display   = "none";
   summaryCard.style.display = "none";
   quizCard.style.display    = "block";
-  correct=0; wrong=0;
-  answeredPorts.clear(); history=[];
+  correct = 0; wrong = 0;
+  answeredPorts.clear(); history = [];
   updateScore();
   nextQuestion();
 }
 
+// —– Prepara la siguiente pregunta —–
 function nextQuestion(){
-  stopFlashTimer();            // SOLO aquí se limpia el timer antes de nueva pregunta
-  lastRawInput=null;
-  resultEl.textContent="";
-  expEl.textContent="";
-  nextBtn.disabled=true;
-  timerEl.textContent = flashMode ? `⏱️ Tiempo: ${timeLeft}s` : "";
+  // Detén cualquier timer anterior (pero no escondas el texto)
+  clearInterval(flashTimer);
 
-  const remaining = data.filter(d=> d.ports.some(p=> !answeredPorts.has(p)));
-  if(!remaining.length) return endQuiz();
-  current = remaining[Math.floor(Math.random()*remaining.length)];
+  lastRawInput = null;
+  resultEl.textContent = "";
+  expEl.textContent    = "";
+  nextBtn.disabled     = true;
+  answerIn.value       = "";
 
-  if(mode==="proto-to-port"){
+  // Selecciona pregunta no respondida
+  const remaining = data.filter(d => d.ports.some(p => !answeredPorts.has(p)));
+  if (!remaining.length) return endQuiz();
+  current = remaining[Math.floor(Math.random() * remaining.length)];
+
+  // Muestra la pregunta
+  if (mode === "proto-to-port") {
     questionEl.textContent = `¿Qué puerto usa ${current.proto}?`;
   } else {
-    const unasked = current.ports.filter(p=> !answeredPorts.has(p));
-    current.port = unasked[Math.floor(Math.random()*unasked.length)];
+    const unasked = current.ports.filter(p => !answeredPorts.has(p));
+    current.port = unasked[Math.floor(Math.random() * unasked.length)];
     questionEl.textContent = `¿Qué protocolo usa el puerto ${current.port}?`;
   }
 
-  answerIn.value="";
-  if(flashMode) startFlashTimer();
+  // Inicia timer si está activo el Modo Flash
+  if (flashMode) startFlashTimer();
+  else timerEl.textContent = "";
 }
 
+// —– Comprueba la respuesta —–
 function checkAnswer(e){
   e.preventDefault();
-  // NO llamamos a stopFlashTimer() aquí: el timer sigue visible
+  // NO clearInterval aquí: mantenemos el timer visible
 
   const raw = answerIn.value.trim();
-  if(!raw){
-    resultEl.textContent="⚠️ Por favor escribe una respuesta.";
-    resultEl.className="result incorrect";
+  if (!raw) {
+    resultEl.textContent = "⚠️ Por favor escribe una respuesta.";
+    resultEl.className   = "result incorrect";
     return;
   }
-  if(raw===lastRawInput){
-    resultEl.textContent="✏️ Cambia tu respuesta para volver a comprobar.";
-    resultEl.className="result incorrect";
+  if (raw === lastRawInput) {
+    resultEl.textContent = "✏️ Cambia tu respuesta para volver a comprobar.";
+    resultEl.className   = "result incorrect";
     return;
   }
-  lastRawInput=raw;
+  lastRawInput = raw;
 
-  const input = raw.toLowerCase().replace(/[^a-z0-9]/gi,"");
-  const isCorrect = mode==="proto-to-port"
+  const input = raw.toLowerCase().replace(/[^a-z0-9]/gi, "");
+  const isCorrect = mode === "proto-to-port"
     ? current.ports.includes(input)
-    : current.proto.split("/").some(p=> p.replace(/[^a-z0-9]/gi,"").toLowerCase().trim()===input);
+    : current.proto.split("/").some(p =>
+        p.replace(/[^a-z0-9]/gi, "").toLowerCase().trim() === input
+      );
 
-  const portLink = mode==="proto-to-port"? current.ports[0] : current.port;
-  expEl.innerHTML=`
+  // Explicación
+  const portLink = mode === "proto-to-port" ? current.ports[0] : current.port;
+  expEl.innerHTML = `
     🔢 <strong>Puerto(s): ${current.ports.join(", ")}</strong><br>
     🧠 <strong>${current.proto}</strong>: ${current.note}<br>
     🔗 <a href="https://www.cbtnuggets.com/common-ports/what-is-port-${portLink}" target="_blank">
@@ -129,106 +143,104 @@ function checkAnswer(e){
     </a>
   `;
 
-  if(isCorrect){
-    resultEl.textContent="✅ ¡Correcto!";
-    resultEl.className="result correct";
-    current.ports.forEach(p=> answeredPorts.add(p));
+  // Resultado
+  if (isCorrect) {
+    resultEl.textContent = "✅ ¡Correcto!";
+    resultEl.className   = "result correct";
+    current.ports.forEach(p => answeredPorts.add(p));
     correct++;
   } else {
-    resultEl.textContent="❌ Incorrecto. Intenta de nuevo.";
-    resultEl.className="result incorrect";
+    resultEl.textContent = "❌ Incorrecto. Intenta de nuevo.";
+    resultEl.className   = "result incorrect";
     wrong++;
   }
 
-  nextBtn.disabled=false;
+  nextBtn.disabled = false;
   updateScore();
-  logHistory(raw,isCorrect);
+  logHistory(raw, isCorrect);
 }
 
+// —– Inicia el timer de Flash —–
 function startFlashTimer(){
   clearInterval(flashTimer);
-  timeLeft=20;
-  timerEl.textContent=`⏱️ Tiempo: ${timeLeft}s`;
-  flashTimer = setInterval(()=>{
+  timeLeft = 20;
+  timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
+  flashTimer = setInterval(() => {
     timeLeft--;
-    timerEl.textContent=`⏱️ Tiempo: ${timeLeft}s`;
-    if(timeLeft<=0){
+    timerEl.textContent = `⏱️ Tiempo: ${timeLeft}s`;
+    if (timeLeft <= 0) {
       clearInterval(flashTimer);
       alert('⏱️ ¡Tiempo agotado! Finalizando test…');
       endQuiz();
     }
-  },1000);
+  }, 1000);
 }
 
-function stopFlashTimer(){
-  clearInterval(flashTimer);
-  // NO limpiamos timerEl aquí, para que siga visible
-}
-
+// —– Alterna tema claro/oscuro —–
 function toggleTheme(){
-  const root=document.documentElement;
-  const bg = getComputedStyle(root).getPropertyValue("--bg").trim();
-  if(bg==="#000"){
-    root.style.setProperty("--bg","#fff");
-    root.style.setProperty("--text","#000");
+  const root = document.documentElement;
+  const bg   = getComputedStyle(root).getPropertyValue("--bg").trim();
+  if (bg === "#000") {
+    root.style.setProperty("--bg",   "#fff");
+    root.style.setProperty("--text", "#000");
     root.style.setProperty("--card-bg","rgba(255,255,255,0.85)");
     root.style.setProperty("--border","#000");
   } else {
-    root.style.setProperty("--bg","#000");
-    root.style.setProperty("--text","#0f0");
+    root.style.setProperty("--bg",   "#000");
+    root.style.setProperty("--text", "#0f0");
     root.style.setProperty("--card-bg","rgba(0,0,0,0.85)");
     root.style.setProperty("--border","#0f0");
   }
 }
 
+// —– Activa/Desactiva Modo Flash —–
 function toggleFlashMode(){
   flashMode = !flashMode;
-  if(!flashMode){
-    clearInterval(flashTimer);
-    timerEl.textContent="";
-  } else {
+  if (flashMode) {
     startFlashTimer();
+    alert("⚡ Modo Flash activado (20s por pregunta)");
+  } else {
+    clearInterval(flashTimer);
+    timerEl.textContent = "";
+    alert("⚡ Modo Flash desactivado");
   }
-  alert(flashMode
-    ? "⚡ Modo Flash activado (20s por pregunta)"
-    : "⚡ Modo Flash desactivado"
-  );
 }
 
+// —– Resto de utilidades —–
 function updateScore(){
-  const total = correct+wrong;
-  const pct   = total? Math.round((correct/total)*100):0;
-  scoreEl.innerHTML=`✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
+  const total = correct + wrong;
+  const pct   = total ? Math.round((correct/total)*100) : 0;
+  scoreEl.innerHTML = `✅ Aciertos: ${correct} | ❌ Errores: ${wrong} | 📊 Precisión: ${pct}%`;
 }
 
-function logHistory(input,ok){
+function logHistory(input, ok){
   history.push(`${questionEl.textContent} ➜ ${input||"(vacío)"} | ${ok?"✅":"❌"}`);
-  historyEl.innerHTML=`<strong>🧾 Últimas respuestas:</strong><ul>${
+  historyEl.innerHTML = `<strong>🧾 Últimas respuestas:</strong><ul>${
     history.slice(-10).map(h=>`<li>${h}</li>`).join("")
   }</ul>`;
 }
 
 function endQuiz(){
   clearInterval(flashTimer);
-  quizCard.style.display="none";
-  summaryCard.style.display="block";
-  const total=correct+wrong;
-  const pct  = total? Math.round((correct/total)*100):0;
-  summaryStats.innerHTML=`
+  quizCard.style.display    = "none";
+  summaryCard.style.display = "block";
+  const total = correct + wrong;
+  const pct   = total ? Math.round((correct/total)*100) : 0;
+  summaryStats.innerHTML = `
     <p>✅ Aciertos: <strong>${correct}</strong></p>
     <p>❌ Errores: <strong>${wrong}</strong></p>
     <p>📊 Precisión: <strong>${pct}%</strong></p>
   `;
-  summaryFailures.innerHTML=`
+  summaryFailures.innerHTML = `
     <h3>❌ Preguntas fallidas:</h3>
     <ul>${
-      history.filter(h=>h.includes("❌")).map(h=>`<li>${h}</li>`).join("")||
+      history.filter(h=>h.includes("❌")).map(h=>`<li>${h}</li>`).join("") ||
       "<li>🎉 ¡No fallaste ninguna!</li>"
     }</ul>
   `;
 }
 
-// —– Listeners —–
+// —– Event Listeners —–
 startBtn.addEventListener("click", startQuiz);
 themeBtn.addEventListener("click", toggleTheme);
 flashBtn.addEventListener("click", toggleFlashMode);
@@ -237,6 +249,6 @@ nextBtn.addEventListener("click", nextQuestion);
 endBtn.addEventListener("click", endQuiz);
 restartBtn.addEventListener("click", ()=>location.reload());
 answerIn.addEventListener("input", ()=>{
-  lastRawInput=null;
-  resultEl.textContent="";
+  lastRawInput = null;
+  resultEl.textContent = "";
 });
